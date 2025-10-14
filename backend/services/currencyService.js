@@ -23,31 +23,70 @@ const SUPPORTED_CURRENCIES = {
 
 /**
  * Fetch exchange rates from API
- * Using exchangerate-api.io free tier (1,500 requests/month)
+ * Using exchangerate.host free API (no key required, unlimited requests)
  */
 const fetchExchangeRates = async () => {
   try {
-    // Using free API - no key required for basic usage
-    // For production, sign up at exchangerate-api.io for API key
-    const response = await axios.get('https://api.exchangerate-api.com/v4/latest/USD');
+    // Using exchangerate.host free API - no key required
+    // Alternative: https://api.exchangerate.host/latest?base=USD
+    const response = await axios.get('https://api.exchangerate.host/latest', {
+      params: {
+        base: 'USD',
+        places: 6
+      },
+      timeout: 5000
+    });
     
-    return {
-      rates: response.data.rates,
-      base: response.data.base,
-      date: response.data.date
-    };
+    if (response.data && response.data.rates) {
+      return {
+        rates: response.data.rates,
+        base: response.data.base || 'USD',
+        date: response.data.date || new Date().toISOString().split('T')[0]
+      };
+    }
+    
+    // If no rates in response, throw error to trigger fallback
+    throw new Error('Invalid API response');
   } catch (error) {
-    console.error('Error fetching exchange rates:', error.message);
+    console.error('Error fetching exchange rates from API:', error.message);
+    
     // Return cached rates if API fails
     if (exchangeRatesCache.rates) {
+      console.log('Using cached exchange rates');
       return {
         rates: exchangeRatesCache.rates,
         base: exchangeRatesCache.baseCurrency,
         date: exchangeRatesCache.lastUpdate
       };
     }
-    throw new Error('Unable to fetch exchange rates');
+    
+    // If no cache available, use fallback rates
+    console.log('Using fallback exchange rates');
+    return {
+      rates: getFallbackRates(),
+      base: 'USD',
+      date: new Date().toISOString().split('T')[0]
+    };
   }
+};
+
+/**
+ * Fallback exchange rates (approximate, updated periodically)
+ * Used when API is unavailable and no cache exists
+ */
+const getFallbackRates = () => {
+  return {
+    USD: 1,
+    EUR: 0.92,
+    GBP: 0.79,
+    JPY: 149.50,
+    LKR: 325.00,
+    INR: 83.20,
+    AUD: 1.52,
+    CAD: 1.36,
+    SGD: 1.34,
+    CNY: 7.24
+  };
 };
 
 /**

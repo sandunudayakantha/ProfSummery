@@ -28,18 +28,32 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
+      console.log('AuthContext: Calling login API...');
       const response = await api.post('/auth/login', { email, password });
+      console.log('AuthContext: API response received:', response.data);
+      
       const { token, ...userData } = response.data.data;
+      
+      if (!token) {
+        console.error('AuthContext: No token in response');
+        return {
+          success: false,
+          message: 'Invalid response from server'
+        };
+      }
       
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(userData));
       setUser(userData);
       
+      console.log('AuthContext: Login successful, user set:', userData);
       return { success: true };
     } catch (error) {
+      console.error('AuthContext: Login error:', error);
+      console.error('AuthContext: Error response:', error.response?.data);
       return {
         success: false,
-        message: error.response?.data?.message || 'Login failed'
+        message: error.response?.data?.message || 'Login failed. Please check your credentials.'
       };
     }
   };

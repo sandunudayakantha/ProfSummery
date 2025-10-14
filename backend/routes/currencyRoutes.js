@@ -7,8 +7,11 @@ const {
 } = require('../controllers/currencyController');
 const { protect } = require('../middleware/authMiddleware');
 
-router.get('/rates', protect, getExchangeRates);
+// Public routes - no authentication required
+router.get('/rates', getExchangeRates);
 router.get('/supported', getSupportedCurrencies);
+
+// Protected routes - authentication required
 router.post('/convert', protect, convertAmount);
 
 module.exports = router;

@@ -27,13 +27,19 @@ const Login = () => {
     setLoading(true);
 
     try {
+      console.log('Attempting login with:', formData.email);
       const result = await login(formData.email, formData.password);
+      console.log('Login result:', result);
+      
       if (result.success) {
+        console.log('Login successful, navigating to dashboard...');
         navigate('/dashboard');
       } else {
-        setError(result.message);
+        console.error('Login failed:', result.message);
+        setError(result.message || 'Login failed. Please check your credentials.');
       }
     } catch (err) {
+      console.error('Login error:', err);
       setError('An error occurred. Please try again.');
     } finally {
       setLoading(false);
