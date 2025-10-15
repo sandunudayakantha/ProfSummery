@@ -1,7 +1,32 @@
 import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { 
+  Briefcase, 
+  TrendingUp, 
+  TrendingDown, 
+  DollarSign, 
+  Calendar,
+  Plus,
+  AlertTriangle,
+  X
+} from 'lucide-react';
+import { 
+  AreaChart, 
+  Area, 
+  PieChart, 
+  Pie, 
+  Cell,
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer,
+  Legend
+} from 'recharts';
 import api from '../utils/api';
-import BusinessCard from '../components/BusinessCard';
+import GlassCard from '../components/GlassCard';
+import FloatingButton from '../components/FloatingButton';
 import { useCurrency } from '../context/CurrencyContext';
 
 const Dashboard = () => {
@@ -52,7 +77,7 @@ const Dashboard = () => {
       setBusinesses([response.data.data, ...businesses]);
       setShowCreateModal(false);
       setFormData({ name: '', description: '' });
-      fetchDashboardData(); // Refresh stats
+      fetchDashboardData();
     } catch (error) {
       setError(error.response?.data?.message || 'Failed to create business');
     }
@@ -62,10 +87,37 @@ const Dashboard = () => {
     try {
       await api.delete(`/business/${businessId}`);
       setBusinesses(businesses.filter(b => b._id !== businessId));
-      fetchDashboardData(); // Refresh stats
+      fetchDashboardData();
     } catch (error) {
       setError(error.response?.data?.message || 'Failed to delete business');
     }
+  };
+
+  // Prepare chart data
+  const prepareChartData = () => {
+    if (!overallStats?.businessBreakdown) return [];
+    
+    return overallStats.businessBreakdown.map(biz => ({
+      name: biz.name.length > 15 ? biz.name.substring(0, 15) + '...' : biz.name,
+      income: biz.income || 0,
+      expense: biz.expense || 0,
+      profit: biz.profit || 0
+    }));
+  };
+
+  // Prepare pie chart data
+  const preparePieData = () => {
+    if (!overallStats) return [];
+    
+    const totalIncome = overallStats.totalIncome || 0;
+    const totalExpense = overallStats.totalExpense || 0;
+    const netProfit = overallStats.netProfit || 0;
+    
+    return [
+      { name: 'Income', value: totalIncome, color: '#90e0f7' },
+      { name: 'Expenses', value: totalExpense, color: '#ef4444' },
+      { name: 'Net Profit', value: Math.abs(netProfit), color: netProfit >= 0 ? '#3b82f6' : '#f97316' }
+    ].filter(item => item.value > 0);
   };
 
   const ownedBusinesses = businesses.filter(b => 
@@ -78,251 +130,494 @@ const Dashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="h-full flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading your businesses...</p>
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 mx-auto" style={{ borderColor: '#90e0f7' }}></div>
+          <p className="mt-4 text-white/70 text-lg">Loading your dashboard...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">My Businesses</h1>
-        <button
-          onClick={() => setShowCreateModal(true)}
-          className="btn btn-primary"
+    <>
+      <div className="h-full overflow-auto p-6 space-y-6">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex flex-col sm:flex-row sm:items-center justify-between gap-4"
         >
-          + Create Business
-        </button>
-      </div>
-
-      {/* Overall Statistics Summary */}
-      {overallStats && businesses.length > 0 && (
-        <div className="mb-8">
-          <h2 className="text-lg font-semibold text-gray-800 mb-4">Portfolio Overview</h2>
-          
-          {/* Main Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-            {/* Total Income */}
-            <div className="card bg-gradient-to-br from-green-50 to-green-100 border border-green-200">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-green-800">Total Income</span>
-                <span className="text-2xl">💰</span>
-              </div>
-              <div className="text-2xl sm:text-3xl font-bold text-green-700 break-words">
-                {formatAmount(overallStats.totalIncome)}
-              </div>
-              <div className="text-xs text-green-600 mt-2">
-                Across {overallStats.totalBusinesses} business{overallStats.totalBusinesses !== 1 ? 'es' : ''}
-              </div>
-            </div>
-
-            {/* Total Expenses */}
-            <div className="card bg-gradient-to-br from-red-50 to-red-100 border border-red-200">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-red-800">Total Expenses</span>
-                <span className="text-2xl">💸</span>
-              </div>
-              <div className="text-2xl sm:text-3xl font-bold text-red-700 break-words">
-                {formatAmount(overallStats.totalExpense)}
-              </div>
-              <div className="text-xs text-red-600 mt-2">
-                {overallStats.totalTransactions} total transactions
-              </div>
-            </div>
-
-            {/* Net Profit */}
-            <div className={`card bg-gradient-to-br border ${
-              overallStats.netProfit >= 0 
-                ? 'from-blue-50 to-blue-100 border-blue-200' 
-                : 'from-orange-50 to-orange-100 border-orange-200'
-            }`}>
-              <div className="flex items-center justify-between mb-2">
-                <span className={`text-sm font-medium ${
-                  overallStats.netProfit >= 0 ? 'text-blue-800' : 'text-orange-800'
-                }`}>
-                  Net Profit
-                </span>
-                <span className="text-2xl">{overallStats.netProfit >= 0 ? '📈' : '📉'}</span>
-              </div>
-              <div className={`text-2xl sm:text-3xl font-bold break-words ${
-                overallStats.netProfit >= 0 ? 'text-blue-700' : 'text-orange-700'
-              }`}>
-                {formatAmount(Math.abs(overallStats.netProfit))}
-              </div>
-              <div className={`text-xs mt-2 ${
-                overallStats.netProfit >= 0 ? 'text-blue-600' : 'text-orange-600'
-              }`}>
-                {overallStats.netProfit >= 0 ? 'Profitable' : 'In Loss'}
-              </div>
-            </div>
-
-            {/* This Month */}
-            <div className="card bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-purple-800">This Month</span>
-                <span className="text-2xl">📅</span>
-              </div>
-              <div className="text-2xl sm:text-3xl font-bold text-purple-700 break-words">
-                {overallStats.thisMonthProfit >= 0 ? '+' : '-'}
-                {formatAmount(Math.abs(overallStats.thisMonthProfit))}
-              </div>
-              <div className="text-xs text-purple-600 mt-2 break-words">
-                {formatAmount(overallStats.thisMonthIncome)} in - {formatAmount(overallStats.thisMonthExpense)} out
-              </div>
+          <div>
+            <h1 className="text-3xl font-bold text-white mb-2">Dashboard Overview</h1>
+            <div className="flex items-center space-x-2">
+              <div className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: '#90e0f7' }}></div>
+              <span className="text-white/50 text-sm">System Online</span>
             </div>
           </div>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setShowCreateModal(true)}
+            className="px-6 py-3 text-white rounded-xl shadow-lg transition-all duration-300 flex items-center space-x-2 hover:opacity-90"
+            style={{ backgroundColor: '#90e0f7' }}
+          >
+            <Plus className="w-5 h-5" />
+            <span>Create Business</span>
+          </motion.button>
+        </motion.div>
 
-          {/* Business Performance Breakdown */}
-          {overallStats.businessBreakdown && overallStats.businessBreakdown.length > 0 && (
-            <div className="card">
-              <h3 className="text-md font-semibold text-gray-800 mb-3">Business Performance</h3>
+        {/* KPI Cards */}
+        {overallStats && businesses.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+            {/* Total Businesses */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0 }}
+            >
+              <GlassCard glow gradient="green" className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <p className="text-white/60 text-sm mb-1">Total Businesses</p>
+                    <h3 className="text-white text-3xl font-bold mb-2">{overallStats.totalBusinesses || 0}</h3>
+                    <div className="flex items-center space-x-2">
+                      <Briefcase className="w-4 h-4" style={{ color: '#90e0f7' }} />
+                      <span className="text-sm" style={{ color: '#90e0f7' }}>Active Portfolio</span>
+                    </div>
+                  </div>
+                  <div className="p-3 rounded-xl" style={{ backgroundColor: 'rgba(144, 224, 247, 0.2)' }}>
+                    <Briefcase className="w-8 h-8 text-white" />
+                  </div>
+                </div>
+              </GlassCard>
+            </motion.div>
+
+            {/* Total Income */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+            >
+              <GlassCard glow gradient="emerald" className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <p className="text-white/60 text-sm mb-1">Total Income</p>
+                    <h3 className="text-white text-3xl font-bold mb-2">{formatAmount(overallStats.totalIncome || 0)}</h3>
+                    <div className="flex items-center space-x-2">
+                      <TrendingUp className="w-4 h-4" style={{ color: '#90e0f7' }} />
+                      <span className="text-sm" style={{ color: '#90e0f7' }}>Revenue Stream</span>
+                    </div>
+                  </div>
+                  <div className="p-3 rounded-xl" style={{ backgroundColor: 'rgba(144, 224, 247, 0.2)' }}>
+                    <TrendingUp className="w-8 h-8 text-white" />
+                  </div>
+                </div>
+              </GlassCard>
+            </motion.div>
+
+            {/* Total Expenses */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <GlassCard glow gradient="red" className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <p className="text-white/60 text-sm mb-1">Total Expenses</p>
+                    <h3 className="text-white text-3xl font-bold mb-2">{formatAmount(overallStats.totalExpense || 0)}</h3>
+                    <div className="flex items-center space-x-2">
+                      <TrendingDown className="w-4 h-4 text-red-400" />
+                      <span className="text-red-400 text-sm">{overallStats.totalTransactions || 0} Transactions</span>
+                    </div>
+                  </div>
+                  <div className="p-3 rounded-xl bg-gradient-to-r from-red-500/20 to-orange-500/20">
+                    <TrendingDown className="w-8 h-8 text-white" />
+                  </div>
+                </div>
+              </GlassCard>
+            </motion.div>
+
+            {/* Net Profit */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              <GlassCard 
+                glow 
+                gradient={overallStats.netProfit >= 0 ? 'blue' : 'orange'} 
+                className="p-6"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <p className="text-white/60 text-sm mb-1">Net Profit</p>
+                    <h3 className={`text-3xl font-bold mb-2 ${
+                      overallStats.netProfit >= 0 ? 'text-blue-400' : 'text-orange-400'
+                    }`}>
+                      {overallStats.netProfit >= 0 ? '+' : '-'}{formatAmount(Math.abs(overallStats.netProfit || 0))}
+                    </h3>
+                    <div className="flex items-center space-x-2">
+                      <DollarSign className={`w-4 h-4 ${
+                        overallStats.netProfit >= 0 ? 'text-blue-400' : 'text-orange-400'
+                      }`} />
+                      <span className={`text-sm ${
+                        overallStats.netProfit >= 0 ? 'text-blue-400' : 'text-orange-400'
+                      }`}>
+                        {overallStats.netProfit >= 0 ? 'Profitable' : 'In Loss'}
+                      </span>
+                    </div>
+                  </div>
+                  <div className={`p-3 rounded-xl ${
+                    overallStats.netProfit >= 0 
+                      ? 'bg-gradient-to-r from-blue-500/20 to-cyan-500/20'
+                      : 'bg-gradient-to-r from-orange-500/20 to-yellow-500/20'
+                  }`}>
+                    <DollarSign className="w-8 h-8 text-white" />
+                  </div>
+                </div>
+              </GlassCard>
+            </motion.div>
+          </div>
+        )}
+
+        {/* Charts Section */}
+        {overallStats && businesses.length > 0 && (
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            {/* Business Performance Chart */}
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.4 }}
+            >
+              <GlassCard className="p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-white text-lg font-semibold">Business Performance</h3>
+                  <div className="flex items-center space-x-4">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#90e0f7' }}></div>
+                      <span className="text-white/60 text-sm">Income</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-3 h-3 bg-red-400 rounded-full"></div>
+                      <span className="text-white/60 text-sm">Expenses</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="h-80">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={prepareChartData()}>
+                      <defs>
+                        <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#90e0f7" stopOpacity={0.3}/>
+                          <stop offset="95%" stopColor="#90e0f7" stopOpacity={0}/>
+                        </linearGradient>
+                        <linearGradient id="colorExpense" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3}/>
+                          <stop offset="95%" stopColor="#ef4444" stopOpacity={0}/>
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                      <XAxis 
+                        dataKey="name" 
+                        stroke="rgba(255,255,255,0.6)" 
+                        style={{ fontSize: '12px' }}
+                      />
+                      <YAxis 
+                        stroke="rgba(255,255,255,0.6)"
+                        style={{ fontSize: '12px' }}
+                      />
+                      <Tooltip 
+                        contentStyle={{ 
+                          backgroundColor: 'rgba(0,0,0,0.8)', 
+                          border: '1px solid rgba(255,255,255,0.2)',
+                          borderRadius: '8px',
+                          backdropFilter: 'blur(10px)',
+                          color: '#fff'
+                        }}
+                        formatter={(value) => formatAmount(value)}
+                      />
+                      <Area 
+                        type="monotone" 
+                        dataKey="income" 
+                        stroke="#90e0f7" 
+                        fillOpacity={1}
+                        fill="url(#colorIncome)" 
+                        strokeWidth={2}
+                      />
+                      <Area 
+                        type="monotone" 
+                        dataKey="expense" 
+                        stroke="#ef4444" 
+                        fillOpacity={1}
+                        fill="url(#colorExpense)"
+                        strokeWidth={2}
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              </GlassCard>
+            </motion.div>
+
+            {/* Financial Breakdown Pie Chart */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.5 }}
+            >
+              <GlassCard className="p-6">
+                <h3 className="text-white text-lg font-semibold mb-6">Financial Breakdown</h3>
+                <div className="h-80 flex items-center justify-center">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={preparePieData()}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={60}
+                        outerRadius={100}
+                        paddingAngle={5}
+                        dataKey="value"
+                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                      >
+                        {preparePieData().map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip 
+                        contentStyle={{ 
+                          backgroundColor: 'rgba(0,0,0,0.8)', 
+                          border: '1px solid rgba(255,255,255,0.2)',
+                          borderRadius: '8px',
+                          color: '#fff'
+                        }}
+                        formatter={(value) => formatAmount(value)}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="flex justify-center space-x-6 mt-4">
+                  {preparePieData().map((item) => (
+                    <div key={item.name} className="flex items-center space-x-2">
+                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }}></div>
+                      <span className="text-white/70 text-sm">{item.name}</span>
+                    </div>
+                  ))}
+                </div>
+              </GlassCard>
+            </motion.div>
+          </div>
+        )}
+
+        {/* Business Performance List */}
+        {overallStats?.businessBreakdown && overallStats.businessBreakdown.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+          >
+            <GlassCard className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-white text-lg font-semibold">Business Performance</h3>
+                <button 
+                  onClick={() => navigate('/businesses')}
+                  className="text-sm transition-colors hover:opacity-80"
+                  style={{ color: '#90e0f7' }}
+                >
+                  View All
+                </button>
+              </div>
               <div className="space-y-3">
-                {overallStats.businessBreakdown.map((biz) => (
-                  <div 
-                    key={biz._id} 
-                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors"
+                {overallStats.businessBreakdown.map((biz, index) => (
+                  <motion.div
+                    key={biz._id}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.7 + index * 0.05 }}
+                    whileHover={{ x: 4 }}
+                    className="flex items-center justify-between p-4 rounded-lg hover:bg-white/5 transition-all duration-200 cursor-pointer"
                     onClick={() => navigate(`/business/${biz._id}`)}
                   >
                     <div className="flex items-center space-x-3">
-                      <span className={`badge badge-${biz.role}`}>{biz.role}</span>
-                      <span className="font-medium text-gray-900">{biz.name}</span>
+                      <div className="w-2 h-2 rounded-full" style={{ backgroundColor: '#90e0f7' }}></div>
+                      <div>
+                        <p className="text-white/90 font-medium">{biz.name}</p>
+                        <p className="text-white/50 text-sm">{biz.role}</p>
+                      </div>
                     </div>
                     <div className="flex items-center space-x-6 text-sm">
-                      <div className="text-green-600">
-                        +{formatAmount(biz.income)}
+                      <div className="text-right">
+                        <p style={{ color: '#90e0f7' }}>+{formatAmount(biz.income || 0)}</p>
+                        <p className="text-white/40 text-xs">Income</p>
                       </div>
-                      <div className="text-red-600">
-                        -{formatAmount(biz.expense)}
+                      <div className="text-right">
+                        <p className="text-red-400">-{formatAmount(biz.expense || 0)}</p>
+                        <p className="text-white/40 text-xs">Expenses</p>
                       </div>
-                      <div className={`font-bold ${biz.profit >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
-                        {biz.profit >= 0 ? '+' : '-'}{formatAmount(Math.abs(biz.profit))}
+                      <div className="text-right">
+                        <p className={`font-bold ${biz.profit >= 0 ? 'text-blue-400' : 'text-orange-400'}`}>
+                          {biz.profit >= 0 ? '+' : '-'}{formatAmount(Math.abs(biz.profit || 0))}
+                        </p>
+                        <p className="text-white/40 text-xs">Profit</p>
                       </div>
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
-            </div>
-          )}
-        </div>
-      )}
+            </GlassCard>
+          </motion.div>
+        )}
 
-      {businesses.length === 0 ? (
-        <div className="text-center py-12">
-          <div className="text-6xl mb-4">📊</div>
-          <h3 className="text-xl font-semibold text-gray-700 mb-2">No businesses yet</h3>
-          <p className="text-gray-500 mb-6">Create your first business to start tracking profit and expenses</p>
-          <button
-            onClick={() => setShowCreateModal(true)}
-            className="btn btn-primary"
+        {/* Empty State */}
+        {businesses.length === 0 && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="text-center py-20"
           >
-            Create Your First Business
-          </button>
-        </div>
-      ) : (
-        <>
-          {/* Owned Businesses */}
-          {ownedBusinesses.length > 0 && (
-            <div className="mb-8">
-              <h2 className="text-xl font-semibold text-gray-800 mb-4">
-                Owned Businesses ({ownedBusinesses.length})
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {ownedBusinesses.map((business) => (
-                  <BusinessCard 
-                    key={business._id} 
-                    business={business}
-                    onDelete={handleDeleteBusiness}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
+            <GlassCard className="p-12 max-w-2xl mx-auto">
+              <div className="text-6xl mb-4">📊</div>
+              <h3 className="text-2xl font-semibold text-white mb-2">No Businesses Yet</h3>
+              <p className="text-white/60 mb-8">Create your first business to start tracking profit and expenses</p>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setShowCreateModal(true)}
+                className="px-8 py-4 text-white rounded-xl shadow-lg transition-all duration-300 inline-flex items-center space-x-2 hover:opacity-90"
+                style={{ backgroundColor: '#90e0f7' }}
+              >
+                <Plus className="w-5 h-5" />
+                <span>Create Your First Business</span>
+              </motion.button>
+            </GlassCard>
+          </motion.div>
+        )}
 
-          {/* Partner Businesses */}
-          {partnerBusinesses.length > 0 && (
-            <div>
-              <h2 className="text-xl font-semibold text-gray-800 mb-4">
-                Partner Businesses ({partnerBusinesses.length})
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {partnerBusinesses.map((business) => (
-                  <BusinessCard 
-                    key={business._id} 
-                    business={business}
-                    onDelete={handleDeleteBusiness}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
-        </>
-      )}
+        {/* Floating Action Button */}
+        {businesses.length > 0 && (
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 0.8, type: "spring" }}
+            className="fixed bottom-8 right-8 z-50"
+          >
+            <FloatingButton 
+              size="lg" 
+              onClick={() => setShowCreateModal(true)}
+              variant="primary"
+            >
+              <Plus className="w-6 h-6" />
+            </FloatingButton>
+          </motion.div>
+        )}
+      </div>
 
       {/* Create Business Modal */}
-      {showCreateModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-8 max-w-md w-full mx-4">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Create New Business</h2>
-            
-            {error && (
-              <div className="bg-red-50 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                {error}
-              </div>
-            )}
+      <AnimatePresence>
+        {showCreateModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+            onClick={() => setShowCreateModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-md"
+            >
+              <GlassCard className="p-8">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-bold text-white">Create New Business</h2>
+                  <button
+                    onClick={() => setShowCreateModal(false)}
+                    className="p-2 rounded-lg hover:bg-white/10 transition-colors"
+                  >
+                    <X className="w-5 h-5 text-white/70" />
+                  </button>
+                </div>
+                
+                {error && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-red-500/20 border border-red-500/50 text-red-200 px-4 py-3 rounded-lg mb-4 flex items-center space-x-2"
+                  >
+                    <AlertTriangle className="w-5 h-5" />
+                    <span>{error}</span>
+                  </motion.div>
+                )}
 
-            <form onSubmit={handleCreateBusiness}>
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Business Name *
-                </label>
-                <input
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="input"
-                  placeholder="My Business"
-                  required
-                />
-              </div>
+                <form onSubmit={handleCreateBusiness} className="space-y-4">
+                  <div>
+                    <label className="block text-white/90 text-sm font-medium mb-2">
+                      Business Name *
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder:text-white/40 focus:outline-none focus:bg-white/10 transition-all"
+                      style={{ 
+                        '--focus-border-color': 'rgba(144, 224, 247, 0.5)'
+                      }}
+                      onFocus={(e) => e.target.style.borderColor = 'rgba(144, 224, 247, 0.5)'}
+                      onBlur={(e) => e.target.style.borderColor = 'rgba(255, 255, 255, 0.2)'}
+                      placeholder="Enter business name"
+                      required
+                    />
+                  </div>
 
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Description (Optional)
-                </label>
-                <textarea
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="input"
-                  rows="3"
-                  placeholder="Brief description of your business"
-                />
-              </div>
+                  <div>
+                    <label className="block text-white/90 text-sm font-medium mb-2">
+                      Description (Optional)
+                    </label>
+                    <textarea
+                      value={formData.description}
+                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                      className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder:text-white/40 focus:outline-none focus:bg-white/10 transition-all resize-none"
+                      onFocus={(e) => e.target.style.borderColor = 'rgba(144, 224, 247, 0.5)'}
+                      onBlur={(e) => e.target.style.borderColor = 'rgba(255, 255, 255, 0.2)'}
+                      rows="3"
+                      placeholder="Brief description of your business"
+                    />
+                  </div>
 
-              <div className="flex space-x-3">
-                <button type="submit" className="btn btn-primary flex-1">
-                  Create Business
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowCreateModal(false);
-                    setFormData({ name: '', description: '' });
-                    setError('');
-                  }}
-                  className="btn btn-secondary"
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-    </div>
+                  <div className="flex space-x-3 pt-4">
+                    <motion.button
+                      type="submit"
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className="flex-1 px-6 py-3 text-white rounded-lg font-medium shadow-lg transition-all duration-300 hover:opacity-90"
+                      style={{ backgroundColor: '#90e0f7' }}
+                    >
+                      Create Business
+                    </motion.button>
+                    <motion.button
+                      type="button"
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => {
+                        setShowCreateModal(false);
+                        setFormData({ name: '', description: '' });
+                        setError('');
+                      }}
+                      className="px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-lg font-medium transition-all duration-300"
+                    >
+                      Cancel
+                    </motion.button>
+                  </div>
+                </form>
+              </GlassCard>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 };
 
