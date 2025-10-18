@@ -18,12 +18,39 @@ const AuthenticatedLayout = ({ children }) => {
   const [sidebarExpanded, setSidebarExpanded] = useState(true);
   
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 overflow-hidden">
-      {/* Animated background elements */}
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 overflow-hidden relative">
+      {/* Subtle animated gradient background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse" style={{ backgroundColor: '#90e0f7' }}></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse" style={{ backgroundColor: '#90e0f7', animationDelay: '2s' }}></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse" style={{ backgroundColor: '#90e0f7', animationDelay: '4s' }}></div>
+        {/* Animated gradient overlay */}
+        <div 
+          className="absolute inset-0 opacity-30"
+          style={{
+            background: 'linear-gradient(45deg, rgba(144, 224, 247, 0.1) 0%, transparent 50%, rgba(144, 224, 247, 0.1) 100%)',
+            backgroundSize: '400% 400%',
+            animation: 'gradientShift 15s ease infinite'
+          }}
+        ></div>
+
+        {/* Floating grid pattern */}
+        <div 
+          className="absolute inset-0 opacity-10"
+          style={{
+            backgroundImage: `
+              linear-gradient(rgba(144, 224, 247, 0.1) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(144, 224, 247, 0.1) 1px, transparent 1px)
+            `,
+            backgroundSize: '50px 50px',
+            animation: 'gridFloat 20s linear infinite'
+          }}
+        ></div>
+
+        {/* Subtle floating particles */}
+        <div className="absolute top-20 left-20 w-2 h-2 rounded-full bg-blue-400 opacity-40 animate-float"></div>
+        <div className="absolute top-40 right-40 w-1.5 h-1.5 rounded-full bg-blue-300 opacity-30 animate-float" style={{ animationDelay: '2s' }}></div>
+        <div className="absolute bottom-40 left-60 w-2 h-2 rounded-full bg-blue-400 opacity-40 animate-float" style={{ animationDelay: '4s' }}></div>
+        <div className="absolute bottom-20 right-20 w-1.5 h-1.5 rounded-full bg-blue-300 opacity-30 animate-float" style={{ animationDelay: '6s' }}></div>
+        <div className="absolute top-1/2 right-60 w-1 h-1 rounded-full bg-blue-400 opacity-30 animate-float" style={{ animationDelay: '3s' }}></div>
+        <div className="absolute top-1/3 left-1/3 w-1.5 h-1.5 rounded-full bg-blue-300 opacity-40 animate-float" style={{ animationDelay: '5s' }}></div>
       </div>
 
       <div className="flex h-screen relative z-10">
