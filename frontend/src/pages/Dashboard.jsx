@@ -180,14 +180,14 @@ const Dashboard = () => {
               <GlassCard glow gradient="green" className="p-6">
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
-                    <p className="text-white/60 text-sm mb-1">Total Businesses</p>
-                    <h3 className="text-white text-3xl font-bold mb-2">{overallStats.totalBusinesses || 0}</h3>
+                    <p className="text-white/80 text-sm font-medium mb-2">Total Businesses</p>
+                    <h3 className="text-white text-4xl font-bold mb-3 tracking-tight">{overallStats.totalBusinesses || 0}</h3>
                     <div className="flex items-center space-x-2">
                       <Briefcase className="w-4 h-4" style={{ color: '#90e0f7' }} />
-                      <span className="text-sm" style={{ color: '#90e0f7' }}>Active Portfolio</span>
+                      <span className="text-sm font-medium" style={{ color: '#90e0f7' }}>Active Portfolio</span>
                     </div>
                   </div>
-                  <div className="p-3 rounded-xl" style={{ backgroundColor: 'rgba(144, 224, 247, 0.2)' }}>
+                  <div className="p-4 rounded-xl" style={{ backgroundColor: 'rgba(144, 224, 247, 0.25)' }}>
                     <Briefcase className="w-8 h-8 text-white" />
                   </div>
                 </div>
@@ -203,14 +203,14 @@ const Dashboard = () => {
               <GlassCard glow gradient="emerald" className="p-6">
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
-                    <p className="text-white/60 text-sm mb-1">Total Income</p>
-                    <h3 className="text-white text-3xl font-bold mb-2">{formatAmount(overallStats.totalIncome || 0)}</h3>
+                    <p className="text-white/80 text-sm font-medium mb-2">Total Income</p>
+                    <h3 className="text-white text-4xl font-bold mb-3 tracking-tight">{formatAmount(overallStats.totalIncome || 0)}</h3>
                     <div className="flex items-center space-x-2">
-                      <TrendingUp className="w-4 h-4" style={{ color: '#90e0f7' }} />
-                      <span className="text-sm" style={{ color: '#90e0f7' }}>Revenue Stream</span>
+                      <TrendingUp className="w-4 h-4" style={{ color: '#10b981' }} />
+                      <span className="text-sm font-medium" style={{ color: '#10b981' }}>Revenue Stream</span>
                     </div>
                   </div>
-                  <div className="p-3 rounded-xl" style={{ backgroundColor: 'rgba(144, 224, 247, 0.2)' }}>
+                  <div className="p-4 rounded-xl" style={{ backgroundColor: 'rgba(16, 185, 129, 0.25)' }}>
                     <TrendingUp className="w-8 h-8 text-white" />
                   </div>
                 </div>
@@ -226,14 +226,14 @@ const Dashboard = () => {
               <GlassCard glow gradient="red" className="p-6">
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
-                    <p className="text-white/60 text-sm mb-1">Total Expenses</p>
-                    <h3 className="text-white text-3xl font-bold mb-2">{formatAmount(overallStats.totalExpense || 0)}</h3>
+                    <p className="text-white/80 text-sm font-medium mb-2">Total Expenses</p>
+                    <h3 className="text-white text-4xl font-bold mb-3 tracking-tight">{formatAmount(overallStats.totalExpense || 0)}</h3>
                     <div className="flex items-center space-x-2">
                       <TrendingDown className="w-4 h-4 text-red-400" />
-                      <span className="text-red-400 text-sm">{overallStats.totalTransactions || 0} Transactions</span>
+                      <span className="text-red-400 text-sm font-medium">{overallStats.totalTransactions || 0} Transactions</span>
                     </div>
                   </div>
-                  <div className="p-3 rounded-xl bg-gradient-to-r from-red-500/20 to-orange-500/20">
+                  <div className="p-4 rounded-xl bg-gradient-to-r from-red-500/25 to-orange-500/25">
                     <TrendingDown className="w-8 h-8 text-white" />
                   </div>
                 </div>
@@ -253,8 +253,8 @@ const Dashboard = () => {
               >
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
-                    <p className="text-white/60 text-sm mb-1">Net Profit</p>
-                    <h3 className={`text-3xl font-bold mb-2 ${
+                    <p className="text-white/80 text-sm font-medium mb-2">Net Profit</p>
+                    <h3 className={`text-4xl font-bold mb-3 tracking-tight ${
                       overallStats.netProfit >= 0 ? 'text-blue-400' : 'text-orange-400'
                     }`}>
                       {overallStats.netProfit >= 0 ? '+' : '-'}{formatAmount(Math.abs(overallStats.netProfit || 0))}
@@ -263,17 +263,17 @@ const Dashboard = () => {
                       <DollarSign className={`w-4 h-4 ${
                         overallStats.netProfit >= 0 ? 'text-blue-400' : 'text-orange-400'
                       }`} />
-                      <span className={`text-sm ${
+                      <span className={`text-sm font-medium ${
                         overallStats.netProfit >= 0 ? 'text-blue-400' : 'text-orange-400'
                       }`}>
                         {overallStats.netProfit >= 0 ? 'Profitable' : 'In Loss'}
                       </span>
                     </div>
                   </div>
-                  <div className={`p-3 rounded-xl ${
+                  <div className={`p-4 rounded-xl ${
                     overallStats.netProfit >= 0 
-                      ? 'bg-gradient-to-r from-blue-500/20 to-cyan-500/20'
-                      : 'bg-gradient-to-r from-orange-500/20 to-yellow-500/20'
+                      ? 'bg-gradient-to-r from-blue-500/25 to-cyan-500/25'
+                      : 'bg-gradient-to-r from-orange-500/25 to-yellow-500/25'
                   }`}>
                     <DollarSign className="w-8 h-8 text-white" />
                   </div>
