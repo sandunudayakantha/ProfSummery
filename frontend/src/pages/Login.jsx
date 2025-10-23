@@ -1,7 +1,65 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
+
+// Enhanced Sakura Petal Component with realistic physics
+const SakuraPetal = ({ delay = 0, duration = 8, x = 0, size = 1, sway = 0 }) => {
+  const petalSize = 8 + size * 4;
+  
+  return (
+    <motion.div
+      className="absolute pointer-events-none"
+      initial={{ 
+        x: x,
+        y: -50,
+        rotate: 0,
+        opacity: 0.8,
+        scale: 0.8
+      }}
+      animate={{ 
+        y: window.innerHeight + 50,
+        x: x + sway,
+        rotate: [0, 180, 360],
+        opacity: [0.8, 0.6, 0.2, 0],
+        scale: [0.8, 1, 0.9, 0.7]
+      }}
+      transition={{
+        duration: duration,
+        delay: delay,
+        ease: "easeInOut",
+        repeat: Infinity,
+        repeatDelay: Math.random() * 4 + 2,
+        times: [0, 0.3, 0.7, 1]
+      }}
+      style={{
+        width: `${petalSize}px`,
+        height: `${petalSize}px`,
+        left: `${x}px`,
+      }}
+    >
+      <motion.div 
+        className="w-full h-full"
+        animate={{
+          rotate: [0, 10, -10, 0],
+        }}
+        transition={{
+          duration: 2,
+          repeat: Infinity,
+          ease: "easeInOut"
+        }}
+        style={{
+          background: `radial-gradient(circle, #ffb3d1 0%, #ff69b4 50%, #ff1493 100%)`,
+          borderRadius: '50% 0 50% 0',
+          transform: 'rotate(45deg)',
+          boxShadow: '0 0 8px rgba(255, 105, 180, 0.4), 0 0 16px rgba(255, 105, 180, 0.2)',
+          filter: 'blur(0.3px)',
+          border: '1px solid rgba(255, 255, 255, 0.1)'
+        }}
+      />
+    </motion.div>
+  );
+};
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -10,9 +68,47 @@ const Login = () => {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [petals, setPetals] = useState([]);
 
   const { login } = useAuth();
   const navigate = useNavigate();
+
+  // Generate Sakura petals with enhanced physics
+  useEffect(() => {
+    const generatePetals = () => {
+      const newPetals = [];
+      const petalCount = window.innerWidth > 768 ? 20 : 12; // More petals on larger screens
+      
+      for (let i = 0; i < petalCount; i++) {
+        newPetals.push({
+          id: `${Date.now()}-${i}`,
+          x: Math.random() * window.innerWidth,
+          delay: Math.random() * 6,
+          duration: 8 + Math.random() * 6,
+          size: Math.random() * 2.5,
+          sway: (Math.random() - 0.5) * 100 // Horizontal sway effect
+        });
+      }
+      setPetals(newPetals);
+    };
+
+    generatePetals();
+    
+    // Regenerate petals periodically for continuous effect
+    const interval = setInterval(generatePetals, 12000);
+    
+    // Handle window resize
+    const handleResize = () => {
+      generatePetals();
+    };
+    
+    window.addEventListener('resize', handleResize);
+    
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
 
   const handleChange = (e) => {
     setFormData({
@@ -48,12 +144,26 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8" style={{ backgroundColor: '#0f172a', color: 'white' }}>
+    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden" style={{ backgroundColor: '#0f172a', color: 'white' }}>
+      {/* Sakura Petals Background */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        {petals.map((petal) => (
+          <SakuraPetal
+            key={petal.id}
+            delay={petal.delay}
+            duration={petal.duration}
+            x={petal.x}
+            size={petal.size}
+            sway={petal.sway}
+          />
+        ))}
+      </div>
+
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="max-w-md w-full space-y-8"
+        className="max-w-md w-full space-y-8 relative z-10"
       >
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}

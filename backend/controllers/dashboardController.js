@@ -105,6 +105,7 @@ exports.getOverallStats = async (req, res) => {
         return {
           _id: business._id,
           name: business.name,
+          logo: business.logo,
           role: userPartner?.role || 'viewer',
           income,
           expense,

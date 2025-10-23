@@ -27,6 +27,7 @@ import {
 import api from '../utils/api';
 import GlassCard from '../components/GlassCard';
 import FloatingButton from '../components/FloatingButton';
+import BusinessLogo from '../components/BusinessLogo';
 import { useCurrency } from '../context/CurrencyContext';
 
 const Dashboard = () => {
@@ -440,7 +441,13 @@ const Dashboard = () => {
                     onClick={() => navigate(`/business/${biz._id}`)}
                   >
                     <div className="flex items-center space-x-3">
-                      <div className="w-2 h-2 rounded-full" style={{ backgroundColor: '#90e0f7' }}></div>
+                      {/* Business Logo */}
+                      <BusinessLogo 
+                        logo={biz.logo}
+                        businessName={biz.name}
+                        size="md"
+                        showBorder={true}
+                      />
                       <div>
                         <p className="text-white/90 font-medium">{biz.name}</p>
                         <p className="text-white/50 text-sm">{biz.role}</p>

@@ -1,4 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
+import BusinessLogo from './BusinessLogo';
 
 const BusinessCard = ({ business, onDelete }) => {
   const navigate = useNavigate();
@@ -30,11 +31,19 @@ const BusinessCard = ({ business, onDelete }) => {
       className="card hover:shadow-lg transition-all duration-200 cursor-pointer hover:scale-[1.02]"
     >
       <div className="flex justify-between items-start mb-4">
-        <div className="flex-1">
-          <h3 className="text-xl font-bold text-gray-900">{business.name}</h3>
-          {business.description && (
-            <p className="text-gray-600 mt-1">{business.description}</p>
-          )}
+        <div className="flex items-start space-x-3 flex-1">
+          <BusinessLogo 
+            logo={business.logo}
+            businessName={business.name}
+            size="lg"
+            showBorder={true}
+          />
+          <div className="flex-1">
+            <h3 className="text-xl font-bold text-gray-900">{business.name}</h3>
+            {business.description && (
+              <p className="text-gray-600 mt-1">{business.description}</p>
+            )}
+          </div>
         </div>
         <span className={`badge badge-${userRole}`}>
           {userRole}
