@@ -128,14 +128,14 @@ const DayWiseTransactionForm = ({ onSubmit, onCancel, preSelectedDate = null }) 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 max-h-[80vh] overflow-y-auto">
       {errors.submit && (
-        <div className="bg-red-50 border border-red-400 text-red-700 px-4 py-3 rounded">
+        <div className="bg-red-500/20 border border-red-400/50 text-red-200 px-4 py-3 rounded-lg">
           {errors.submit}
         </div>
       )}
 
       {/* Date Selection */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-white/90 mb-2">
           Transaction Date *
         </label>
         <input
@@ -144,18 +144,20 @@ const DayWiseTransactionForm = ({ onSubmit, onCancel, preSelectedDate = null }) 
           onChange={(e) => setDate(e.target.value)}
           max={new Date().toISOString().split('T')[0]}
           disabled={preSelectedDate !== null}
-          className={`input ${errors.date ? 'border-red-500' : ''} ${preSelectedDate ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+          className={`w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder:text-white/40 focus:outline-none focus:bg-white/10 transition-all ${errors.date ? 'border-red-400' : ''} ${preSelectedDate ? 'bg-white/10 cursor-not-allowed' : ''}`}
+          onFocus={(e) => e.target.style.borderColor = 'rgba(144, 224, 247, 0.5)'}
+          onBlur={(e) => e.target.style.borderColor = 'rgba(255, 255, 255, 0.2)'}
           required
         />
         {errors.date && (
-          <p className="text-red-500 text-sm mt-1">{errors.date}</p>
+          <p className="text-red-400 text-sm mt-1">{errors.date}</p>
         )}
         {preSelectedDate ? (
-          <p className="text-xs text-blue-600 mt-1">
+          <p className="text-xs text-blue-400 mt-1">
             Adding to existing date: {new Date(preSelectedDate).toLocaleDateString()}
           </p>
         ) : (
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="text-xs text-white/50 mt-1">
             Future dates are not allowed
           </p>
         )}
@@ -164,19 +166,19 @@ const DayWiseTransactionForm = ({ onSubmit, onCancel, preSelectedDate = null }) 
       {/* Transaction Items */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-medium text-gray-700">Transactions for this day</h3>
+          <h3 className="text-sm font-medium text-white/90">Transactions for this day</h3>
           <div className="flex space-x-2">
             <button
               type="button"
               onClick={() => addItem('income')}
-              className="text-xs px-3 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200"
+              className="text-xs px-3 py-1 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 border border-green-400/30 transition-all duration-300"
             >
               + Income
             </button>
             <button
               type="button"
               onClick={() => addItem('expense')}
-              className="text-xs px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200"
+              className="text-xs px-3 py-1 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 border border-red-400/30 transition-all duration-300"
             >
               + Expense
             </button>
@@ -187,13 +189,17 @@ const DayWiseTransactionForm = ({ onSubmit, onCancel, preSelectedDate = null }) 
           <div
             key={index}
             className={`p-3 border-2 rounded-lg ${
-              item.type === 'income' ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'
+              item.type === 'income' ? 'border-green-400/30 bg-green-500/10' : 'border-red-400/30 bg-red-500/10'
             }`}
           >
             <div className="flex items-start space-x-3">
               {/* Type Badge */}
               <div className="flex-shrink-0 mt-2">
-                <span className={`badge ${item.type === 'income' ? 'badge-income' : 'badge-expense'}`}>
+                <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                  item.type === 'income' 
+                    ? 'bg-green-500/20 text-green-400 border border-green-400/30' 
+                    : 'bg-red-500/20 text-red-400 border border-red-400/30'
+                }`}>
                   {item.type === 'income' ? '↑ Income' : '↓ Expense'}
                 </span>
               </div>
@@ -205,11 +211,13 @@ const DayWiseTransactionForm = ({ onSubmit, onCancel, preSelectedDate = null }) 
                   value={item.description}
                   onChange={(e) => updateItem(index, 'description', e.target.value)}
                   placeholder="Description (e.g., Client payment, Office rent)"
-                  className="input text-sm"
+                  className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder:text-white/40 focus:outline-none focus:bg-white/10 transition-all text-sm"
+                  onFocus={(e) => e.target.style.borderColor = 'rgba(144, 224, 247, 0.5)'}
+                  onBlur={(e) => e.target.style.borderColor = 'rgba(255, 255, 255, 0.2)'}
                   required
                 />
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-semibold">
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60 font-semibold">
                     {getCurrencySymbol()}
                   </span>
                   <input
@@ -219,7 +227,9 @@ const DayWiseTransactionForm = ({ onSubmit, onCancel, preSelectedDate = null }) 
                     placeholder={`Amount in ${userCurrency}`}
                     step={userCurrency === 'JPY' ? '1' : '0.01'}
                     min="0"
-                    className="input text-sm pl-8"
+                    className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder:text-white/40 focus:outline-none focus:bg-white/10 transition-all text-sm pl-8"
+                    onFocus={(e) => e.target.style.borderColor = 'rgba(144, 224, 247, 0.5)'}
+                    onBlur={(e) => e.target.style.borderColor = 'rgba(255, 255, 255, 0.2)'}
                     required
                   />
                 </div>
@@ -230,7 +240,7 @@ const DayWiseTransactionForm = ({ onSubmit, onCancel, preSelectedDate = null }) 
                 <button
                   type="button"
                   onClick={() => removeItem(index)}
-                  className="flex-shrink-0 text-gray-400 hover:text-red-600 mt-2"
+                  className="flex-shrink-0 text-white/40 hover:text-red-400 mt-2 transition-colors duration-300"
                   title="Remove item"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -241,42 +251,43 @@ const DayWiseTransactionForm = ({ onSubmit, onCancel, preSelectedDate = null }) 
             </div>
             
             {errors[`item${index}`] && (
-              <p className="text-red-500 text-xs mt-1 ml-16">{errors[`item${index}`]}</p>
+              <p className="text-red-400 text-xs mt-1 ml-16">{errors[`item${index}`]}</p>
             )}
           </div>
         ))}
       </div>
 
       {/* Totals Summary */}
-      <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-        <h4 className="text-sm font-medium text-gray-700 mb-2">Day Summary (in {userCurrency})</h4>
+      <div className="bg-white/5 p-4 rounded-lg border border-white/20">
+        <h4 className="text-sm font-medium text-white/90 mb-2">Day Summary (in {userCurrency})</h4>
         <div className="grid grid-cols-3 gap-4 text-sm">
           <div>
-            <span className="text-gray-600">Total Income:</span>
-            <p className="font-bold text-green-600 break-words">{formatAmount(totals.totalIncome)}</p>
+            <span className="text-white/60">Total Income:</span>
+            <p className="font-bold text-green-400 break-words">{formatAmount(totals.totalIncome)}</p>
           </div>
           <div>
-            <span className="text-gray-600">Total Expenses:</span>
-            <p className="font-bold text-red-600 break-words">{formatAmount(totals.totalExpense)}</p>
+            <span className="text-white/60">Total Expenses:</span>
+            <p className="font-bold text-red-400 break-words">{formatAmount(totals.totalExpense)}</p>
           </div>
           <div>
-            <span className="text-gray-600">Net:</span>
-            <p className={`font-bold break-words ${totals.netTotal >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
+            <span className="text-white/60">Net:</span>
+            <p className={`font-bold break-words ${totals.netTotal >= 0 ? 'text-blue-400' : 'text-red-400'}`}>
               {formatAmount(totals.netTotal)}
             </p>
           </div>
         </div>
-        <p className="text-xs text-gray-500 mt-3">
+        <p className="text-xs text-white/50 mt-3">
           💡 Amounts will be automatically converted to USD for storage
         </p>
       </div>
 
       {/* Action Buttons */}
-      <div className="flex space-x-3 pt-4 border-t">
+      <div className="flex space-x-3 pt-4 border-t border-white/20">
         <button
           type="submit"
           disabled={loading}
-          className="btn btn-primary flex-1"
+          className="flex-1 px-6 py-3 text-white rounded-lg font-medium shadow-lg transition-all duration-300 hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+          style={{ backgroundColor: '#90e0f7' }}
         >
           {loading ? '💱 Converting & Saving...' : `💾 Save ${items.length} Transaction${items.length > 1 ? 's' : ''}`}
         </button>
@@ -284,7 +295,7 @@ const DayWiseTransactionForm = ({ onSubmit, onCancel, preSelectedDate = null }) 
           <button
             type="button"
             onClick={onCancel}
-            className="btn btn-secondary"
+            className="px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-lg font-medium transition-all duration-300"
           >
             Cancel
           </button>
