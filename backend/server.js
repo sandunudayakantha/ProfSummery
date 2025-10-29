@@ -17,24 +17,31 @@ const corsOptions = {
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
     
-    const allowedOrigins = process.env.NODE_ENV === 'production' 
-      ? [
-          process.env.FRONTEND_URL || 'https://prof-summery-gax2.vercel.app',
-          'https://prof-summery-gax2.vercel.app',
-          'https://prof-summery.vercel.app',
-          'https://prof-summery-blqf.vercel.app'
-        ]
-      : [
-          'http://localhost:5173', 
-          'http://localhost:3000', 
-          'http://localhost:3001',
-          'http://localhost:3002',
-          'http://localhost:3003',
-          'http://localhost:3004',
-          'http://127.0.0.1:5173'
-        ];
+    // Always include the known production domains
+    const allowedOrigins = [
+      'https://prof-summery-gax2.vercel.app',
+      'https://prof-summery.vercel.app',
+      'https://prof-summery-blqf.vercel.app',
+      'http://localhost:5173', 
+      'http://localhost:3000', 
+      'http://localhost:3001',
+      'http://localhost:3002',
+      'http://localhost:3003',
+      'http://localhost:3004',
+      'http://127.0.0.1:5173'
+    ];
+    
+    // Add FRONTEND_URL if it exists and is not already in the list
+    if (process.env.FRONTEND_URL && !allowedOrigins.includes(process.env.FRONTEND_URL)) {
+      allowedOrigins.push(process.env.FRONTEND_URL);
+    }
+    
+    console.log('CORS: Checking origin:', origin);
+    console.log('CORS: Allowed origins:', allowedOrigins);
+    console.log('CORS: FRONTEND_URL env var:', process.env.FRONTEND_URL);
     
     if (allowedOrigins.indexOf(origin) !== -1) {
+      console.log('CORS: Origin allowed:', origin);
       callback(null, true);
     } else {
       console.log('CORS: Origin not allowed:', origin);
