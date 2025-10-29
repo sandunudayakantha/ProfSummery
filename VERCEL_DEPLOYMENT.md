@@ -5,21 +5,38 @@
 /
 ├── backend/           # Node.js/Express API
 ├── frontend/          # React/Vite Frontend
-├── vercel.json        # Vercel configuration
+├── vercel.json        # Root Vercel configuration
 ├── package.json       # Root package.json
 └── README.md
 ```
 
-## Deployment Steps
+## Deployment Strategy
 
-### 1. Environment Variables
+### Option 1: Deploy Backend and Frontend Separately (Recommended)
 
-#### Frontend (.env in frontend directory):
-```
-VITE_API_URL=https://your-app.vercel.app/api
-```
+#### Backend Deployment:
+1. Create a new Vercel project for backend
+2. Connect the `backend/` folder
+3. Use the `backend/vercel.json` configuration
+4. Set environment variables in Vercel dashboard
 
-#### Backend (Set in Vercel Dashboard):
+#### Frontend Deployment:
+1. Create a new Vercel project for frontend
+2. Connect the `frontend/` folder
+3. Use the `frontend/vercel.json` configuration
+4. Set build command: `npm run build`
+5. Set output directory: `dist`
+
+### Option 2: Deploy Both from Root (Alternative)
+
+1. Connect the root repository to Vercel
+2. Use the root `vercel.json` configuration
+3. Set build command: `npm run build`
+4. Set output directory: `frontend/dist`
+
+## Environment Variables
+
+### Backend (Set in Vercel Dashboard):
 ```
 NODE_ENV=production
 MONGO_URI=mongodb+srv://your-mongodb-connection-string
@@ -27,55 +44,45 @@ JWT_SECRET=your-production-jwt-secret
 CLOUDINARY_CLOUD_NAME=your-cloudinary-cloud-name
 CLOUDINARY_API_KEY=your-cloudinary-api-key
 CLOUDINARY_API_SECRET=your-cloudinary-api-secret
-FRONTEND_URL=https://your-app.vercel.app
+FRONTEND_URL=https://your-frontend-app.vercel.app
 ```
 
-### 2. Vercel Configuration
-
-The `vercel.json` file is already configured to:
-- Deploy backend as serverless functions
-- Deploy frontend as static site
-- Route `/api/*` to backend
-- Route everything else to frontend
-
-### 3. Deployment Commands
-
-#### Local Development:
-```bash
-npm run install:all  # Install all dependencies
-npm run dev          # Start both frontend and backend
+### Frontend (.env in frontend directory):
+```
+VITE_API_URL=https://your-backend-app.vercel.app
 ```
 
-#### Production Build:
-```bash
-npm run build        # Build frontend for production
-```
+## Deployment Steps
 
-### 4. Vercel Deployment
+### For Backend:
+1. Go to Vercel dashboard
+2. Click "New Project"
+3. Import your repository
+4. Set root directory to `backend`
+5. Vercel will automatically detect the `vercel.json`
+6. Add environment variables
+7. Deploy!
 
-1. Connect your GitHub repository to Vercel
-2. Set build command: `npm run build`
-3. Set output directory: `frontend/dist`
-4. Add all environment variables
-5. Deploy!
+### For Frontend:
+1. Go to Vercel dashboard
+2. Click "New Project"
+3. Import your repository
+4. Set root directory to `frontend`
+5. Set build command: `npm run build`
+6. Set output directory: `dist`
+7. Add environment variables
+8. Deploy!
 
-### 5. Important Notes
-
-- Backend runs as Vercel serverless functions
-- 10-second execution limit (should be fine for this app)
-- Cold starts may occur on first request
-- File uploads handled by Cloudinary
-- Database connections managed by MongoDB Atlas
-
-### 6. Testing
+## Testing
 
 After deployment:
-1. Check API health: `https://your-app.vercel.app/api`
-2. Test frontend: `https://your-app.vercel.app`
-3. Verify all features work correctly
+1. Backend API: `https://your-backend-app.vercel.app/`
+2. Frontend: `https://your-frontend-app.vercel.app`
+3. Test API endpoints: `https://your-backend-app.vercel.app/api/auth/login`
 
 ## Troubleshooting
 
-- If API calls fail, check CORS configuration
-- If build fails, ensure all dependencies are installed
-- If environment variables don't work, check Vercel dashboard settings
+- **404 Error**: Check that `vercel.json` is in the correct directory
+- **Build Error**: Ensure all dependencies are in `package.json`
+- **CORS Error**: Update `FRONTEND_URL` environment variable
+- **API Not Found**: Check that routes are properly configured in `vercel.json`
