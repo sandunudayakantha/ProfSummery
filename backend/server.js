@@ -13,21 +13,34 @@ const app = express();
 
 // CORS Configuration
 const corsOptions = {
-  origin: process.env.NODE_ENV === 'production' 
-    ? [
-        process.env.FRONTEND_URL || 'https://profsummary-blqf.vercel.app',
-        'https://profsummary-blqf.vercel.app',
-        'https://profsummary.vercel.app'
-      ]
-    : [
-        'http://localhost:5173', 
-        'http://localhost:3000', 
-        'http://localhost:3001',
-        'http://localhost:3002',
-        'http://localhost:3003',
-        'http://localhost:3004',
-        'http://127.0.0.1:5173'
-      ],
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    const allowedOrigins = process.env.NODE_ENV === 'production' 
+      ? [
+          process.env.FRONTEND_URL || 'https://prof-summery-gax2.vercel.app',
+          'https://prof-summery-gax2.vercel.app',
+          'https://prof-summery.vercel.app',
+          'https://prof-summery-blqf.vercel.app'
+        ]
+      : [
+          'http://localhost:5173', 
+          'http://localhost:3000', 
+          'http://localhost:3001',
+          'http://localhost:3002',
+          'http://localhost:3003',
+          'http://localhost:3004',
+          'http://127.0.0.1:5173'
+        ];
+    
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      console.log('CORS: Origin not allowed:', origin);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   optionsSuccessStatus: 200,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
