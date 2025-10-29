@@ -15,8 +15,9 @@ const app = express();
 const corsOptions = {
   origin: process.env.NODE_ENV === 'production' 
     ? [
-        process.env.FRONTEND_URL || 'https://your-app.vercel.app',
-        'https://your-app.vercel.app'
+        process.env.FRONTEND_URL || 'https://profsummary-blqf.vercel.app',
+        'https://profsummary-blqf.vercel.app',
+        'https://profsummary.vercel.app'
       ]
     : [
         'http://localhost:5173', 
@@ -66,7 +67,19 @@ app.use('/api/business/:id/documents', documentRoutes);
 app.get('/', (req, res) => {
   res.json({
     success: true,
-    message: 'Profit Summary API is running'
+    message: 'Profit Summary API is running',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development'
+  });
+});
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({
+    success: true,
+    message: 'API is healthy',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development'
   });
 });
 
