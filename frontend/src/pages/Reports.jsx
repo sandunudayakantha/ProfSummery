@@ -45,6 +45,13 @@ const Reports = () => {
   });
   const { formatAmount, userCurrency, getCurrencySymbol } = useCurrency();
 
+  // Helper function to get yesterday's date (max selectable date)
+  const getYesterdayDate = () => {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    return yesterday.toISOString().split('T')[0];
+  };
+
   useEffect(() => {
     fetchBusiness();
   }, [id]);
@@ -72,14 +79,17 @@ const Reports = () => {
       if (filters.period !== 'custom') {
         params.append('period', filters.period);
       } else if (filters.startDate && filters.endDate) {
-        // Validate dates are not in the future
+        // Validate dates are not today or in the future
         const today = new Date();
         today.setHours(0, 0, 0, 0);
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+        
         const start = new Date(filters.startDate);
         const end = new Date(filters.endDate);
         
-        if (start > today || end > today) {
-          alert('Cannot select future dates for reports');
+        if (start >= today || end >= today) {
+          alert('Cannot select today or future dates for reports');
           setLoading(false);
           return;
         }
@@ -113,7 +123,7 @@ const Reports = () => {
       
       doc.setFontSize(12);
       doc.text(`Financial Report`, 14, 30);
-      doc.text(`Period: ${new Date(reportData.startDate).toLocaleDateString()} - ${new Date(reportData.endDate).toLocaleDateString()}`, 14, 37);
+      doc.text(`Period: ${reportData.startDateFormatted || new Date(reportData.startDate).toLocaleDateString()} - ${reportData.endDateFormatted || new Date(reportData.endDate).toLocaleDateString()}`, 14, 37);
       
       // Summary
       doc.setFontSize(14);
@@ -291,13 +301,13 @@ const Reports = () => {
                     type="date"
                     value={filters.startDate}
                     onChange={(e) => setFilters({ ...filters, startDate: e.target.value })}
-                    max={new Date().toISOString().split('T')[0]}
+                    max={getYesterdayDate()}
                     className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white focus:outline-none focus:bg-white/10 transition-all"
                     onFocus={(e) => e.target.style.borderColor = 'rgba(144, 224, 247, 0.5)'}
                     onBlur={(e) => e.target.style.borderColor = 'rgba(255, 255, 255, 0.2)'}
                     style={{ colorScheme: 'dark' }}
                   />
-                  <p className="text-xs text-white/50 mt-2">Future dates are not allowed</p>
+                  <p className="text-xs text-white/50 mt-2">Today and future dates are not allowed</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-white/90 mb-3 flex items-center space-x-2">
@@ -309,7 +319,7 @@ const Reports = () => {
                     value={filters.endDate}
                     onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
                     min={filters.startDate}
-                    max={new Date().toISOString().split('T')[0]}
+                    max={getYesterdayDate()}
                     className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white focus:outline-none focus:bg-white/10 transition-all"
                     onFocus={(e) => e.target.style.borderColor = 'rgba(144, 224, 247, 0.5)'}
                     onBlur={(e) => e.target.style.borderColor = 'rgba(255, 255, 255, 0.2)'}
@@ -317,8 +327,8 @@ const Reports = () => {
                   />
                   <p className="text-xs text-white/50 mt-2">
                     {filters.startDate 
-                      ? 'Must be after start date and not in future' 
-                      : 'Future dates are not allowed'}
+                      ? 'Must be after start date and not today or future' 
+                      : 'Today and future dates are not allowed'}
                   </p>
                 </div>
               </>
@@ -440,7 +450,7 @@ const Reports = () => {
                 <div className="flex items-center space-x-2">
                   <Activity className="w-4 h-4 text-purple-400" />
                   <span className="text-purple-400 text-sm">
-                    {new Date(reportData.startDate).toLocaleDateString()}
+                    {reportData.startDateFormatted || new Date(reportData.startDate).toLocaleDateString()}
                   </span>
                 </div>
               </div>

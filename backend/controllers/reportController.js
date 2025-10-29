@@ -31,8 +31,29 @@ exports.generateReport = async (req, res) => {
       end.setMonth(11, 31);
       end.setHours(23, 59, 59, 999);
     } else if (startDate && endDate) {
+      // Parse custom date range and set proper time boundaries
       start = new Date(startDate);
       end = new Date(endDate);
+      
+      // Validate dates
+      if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid date format provided'
+        });
+      }
+      
+      // Ensure start date is not after end date
+      if (start > end) {
+        return res.status(400).json({
+          success: false,
+          message: 'Start date cannot be after end date'
+        });
+      }
+      
+      // Set proper time boundaries
+      start.setHours(0, 0, 0, 0); // Start of day
+      end.setHours(23, 59, 59, 999); // End of day
     } else {
       // Default to all time
       start = new Date(0);
@@ -97,8 +118,10 @@ exports.generateReport = async (req, res) => {
       success: true,
       data: {
         period: period || 'custom',
-        startDate: start,
-        endDate: end,
+        startDate: start.toISOString(),
+        endDate: end.toISOString(),
+        startDateFormatted: start.toLocaleDateString(),
+        endDateFormatted: end.toLocaleDateString(),
         summary: {
           totalIncome,
           totalExpense,
