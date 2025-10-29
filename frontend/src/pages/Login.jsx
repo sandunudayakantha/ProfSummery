@@ -237,9 +237,18 @@ const Login = () => {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.4, delay: 0.6 }}
               >
-                <label htmlFor="password" className="block text-sm font-medium text-white/90 mb-1" style={{ color: 'rgba(255, 255, 255, 0.9)' }}>
-                  Password
-                </label>
+                <div className="flex items-center justify-between mb-1">
+                  <label htmlFor="password" className="block text-sm font-medium text-white/90" style={{ color: 'rgba(255, 255, 255, 0.9)' }}>
+                    Password
+                  </label>
+                  <Link 
+                    to="/forgot-password" 
+                    className="text-sm font-medium text-blue-400 hover:text-blue-300 transition-colors"
+                    style={{ color: '#60a5fa' }}
+                  >
+                    Forgot password?
+                  </Link>
+                </div>
                 <input
                   id="password"
                   name="password"

@@ -32,6 +32,14 @@ exports.protect = async (req, res, next) => {
       });
     }
 
+    // Check if token version matches (for logout on disapproval)
+    if (decoded.tokenVersion !== req.user.tokenVersion) {
+      return res.status(401).json({
+        success: false,
+        message: 'Session expired. Please log in again.'
+      });
+    }
+
     next();
   } catch (error) {
     return res.status(401).json({
@@ -111,6 +119,50 @@ exports.isOwner = async (req, res, next) => {
     return res.status(500).json({
       success: false,
       message: 'Error checking ownership',
+      error: error.message
+    });
+  }
+};
+
+// Check if user is admin
+exports.isAdmin = async (req, res, next) => {
+  try {
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied. Admin privileges required.'
+      });
+    }
+    next();
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: 'Error checking admin privileges',
+      error: error.message
+    });
+  }
+};
+
+// Check if user is approved (for regular users)
+exports.isApproved = async (req, res, next) => {
+  try {
+    // Admins are always approved
+    if (req.user.role === 'admin') {
+      return next();
+    }
+    
+    // Check if regular user is approved
+    if (!req.user.isApproved) {
+      return res.status(403).json({
+        success: false,
+        message: 'Your account is pending approval. Please contact an administrator.'
+      });
+    }
+    next();
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: 'Error checking approval status',
       error: error.message
     });
   }

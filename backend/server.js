@@ -14,7 +14,10 @@ const app = express();
 // CORS Configuration
 const corsOptions = {
   origin: process.env.NODE_ENV === 'production' 
-    ? process.env.FRONTEND_URL || '*'
+    ? [
+        process.env.FRONTEND_URL || 'https://your-app.vercel.app',
+        'https://your-app.vercel.app'
+      ]
     : [
         'http://localhost:5173', 
         'http://localhost:3000', 
@@ -37,6 +40,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Import routes
 const authRoutes = require('./routes/authRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const currencyRoutes = require('./routes/currencyRoutes');
 const businessRoutes = require('./routes/businessRoutes');
@@ -47,6 +51,7 @@ const documentRoutes = require('./routes/documentRoutes');
 
 // Mount routes
 app.use('/api/auth', authRoutes);
+app.use('/api/admin', adminRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/currency', currencyRoutes);
 app.use('/api/business', businessRoutes);
@@ -85,9 +90,12 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 5002;
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+// Only start server if not in Vercel environment
+if (process.env.NODE_ENV !== 'production' || process.env.VERCEL !== '1') {
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}
 
 module.exports = app;
 

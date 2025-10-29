@@ -4,10 +4,11 @@ const {
   generateReport,
   getStatistics
 } = require('../controllers/reportController');
-const { protect, checkBusinessAccess } = require('../middleware/authMiddleware');
+const { protect, isApproved, checkBusinessAccess } = require('../middleware/authMiddleware');
 
-// All routes require authentication and business access (any role can view reports)
+// All routes require authentication, approval, and business access (any role can view reports)
 router.use(protect);
+router.use(isApproved);
 
 router.get('/', checkBusinessAccess(), generateReport);
 router.get('/stats', checkBusinessAccess(), getStatistics);

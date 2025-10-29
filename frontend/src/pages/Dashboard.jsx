@@ -204,7 +204,7 @@ const Dashboard = () => {
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
                     <p className="text-white/80 text-sm font-medium mb-2">Total Income</p>
-                    <h3 className="text-white text-4xl font-bold mb-3 tracking-tight">{formatAmount(overallStats.totalIncome || 0)}</h3>
+                    <h3 className="text-white text-2xl font-bold mb-3 tracking-tight">{formatAmount(overallStats.totalIncome || 0)}</h3>
                     <div className="flex items-center space-x-2">
                       <TrendingUp className="w-4 h-4" style={{ color: '#10b981' }} />
                       <span className="text-sm font-medium" style={{ color: '#10b981' }}>Revenue Stream</span>
@@ -227,7 +227,7 @@ const Dashboard = () => {
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
                     <p className="text-white/80 text-sm font-medium mb-2">Total Expenses</p>
-                    <h3 className="text-white text-4xl font-bold mb-3 tracking-tight">{formatAmount(overallStats.totalExpense || 0)}</h3>
+                    <h3 className="text-white text-2xl font-bold mb-3 tracking-tight">{formatAmount(overallStats.totalExpense || 0)}</h3>
                     <div className="flex items-center space-x-2">
                       <TrendingDown className="w-4 h-4 text-red-400" />
                       <span className="text-red-400 text-sm font-medium">{overallStats.totalTransactions || 0} Transactions</span>
@@ -254,7 +254,7 @@ const Dashboard = () => {
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
                     <p className="text-white/80 text-sm font-medium mb-2">Net Profit</p>
-                    <h3 className={`text-4xl font-bold mb-3 tracking-tight ${
+                    <h3 className={`text-2xl font-bold mb-3 tracking-tight ${
                       overallStats.netProfit >= 0 ? 'text-blue-400' : 'text-orange-400'
                     }`}>
                       {overallStats.netProfit >= 0 ? '+' : '-'}{formatAmount(Math.abs(overallStats.netProfit || 0))}

@@ -26,9 +26,9 @@ const BusinessLogo = ({
         border: showBorder ? '2px solid rgba(255, 255, 255, 0.2)' : 'none'
       }}
     >
-      {logo && !imageError ? (
+      {logo?.url && !imageError ? (
         <img 
-          src={logo} 
+          src={logo.url} 
           alt={`${businessName} logo`}
           className="w-full h-full object-cover"
           onError={() => setImageError(true)}

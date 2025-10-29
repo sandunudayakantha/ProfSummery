@@ -7,16 +7,26 @@ const {
   updateBusiness,
   deleteBusiness
 } = require('../controllers/businessController');
-const { protect } = require('../middleware/authMiddleware');
+const {
+  uploadLogo,
+  deleteLogo
+} = require('../controllers/documentController');
+const { protect, isApproved, checkBusinessAccess } = require('../middleware/authMiddleware');
+const { uploadImage } = require('../config/cloudinary');
 
 router.route('/')
-  .get(protect, getAllBusinesses)
-  .post(protect, createBusiness);
+  .get(protect, isApproved, getAllBusinesses)
+  .post(protect, isApproved, createBusiness);
 
 router.route('/:id')
-  .get(protect, getBusiness)
-  .put(protect, updateBusiness)
-  .delete(protect, deleteBusiness);
+  .get(protect, isApproved, getBusiness)
+  .put(protect, isApproved, updateBusiness)
+  .delete(protect, isApproved, deleteBusiness);
+
+// Logo routes (owner only)
+router.route('/:id/logo')
+  .post(protect, isApproved, checkBusinessAccess('owner'), uploadImage.single('logo'), uploadLogo)
+  .delete(protect, isApproved, checkBusinessAccess('owner'), deleteLogo);
 
 module.exports = router;
 

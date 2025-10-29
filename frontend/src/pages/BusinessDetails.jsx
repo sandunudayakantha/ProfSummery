@@ -164,6 +164,17 @@ const BusinessDetails = () => {
     }
   };
 
+  const handleUpdatePartnerRole = async (partnerId, newRole) => {
+    try {
+      await api.put(`/business/${id}/partners/${partnerId}`, {
+        role: newRole
+      });
+      fetchBusinessData();
+    } catch (error) {
+      setError(error.response?.data?.message || 'Failed to update partner role');
+    }
+  };
+
   const canEdit = business?.userRole === 'owner' || business?.userRole === 'editor';
   const isOwner = business?.userRole === 'owner';
 
@@ -614,9 +625,21 @@ const BusinessDetails = () => {
                     </div>
                   </div>
                   <div className="flex items-center space-x-3">
-                    <div className="px-3 py-1 rounded-full bg-white/10 border border-white/20">
-                      <span className="text-white/90 text-sm font-medium capitalize">{partner.role}</span>
-                    </div>
+                    {isOwner && partner.role !== 'owner' ? (
+                      <select
+                        value={partner.role}
+                        onChange={(e) => handleUpdatePartnerRole(partner._id, e.target.value)}
+                        className="px-3 py-1 rounded-lg bg-white/10 border border-white/20 text-white/90 text-sm font-medium focus:outline-none focus:border-blue-400 transition-all duration-300 appearance-none cursor-pointer"
+                        style={{ colorScheme: 'dark' }}
+                      >
+                        <option value="viewer" className="bg-slate-800">Viewer</option>
+                        <option value="editor" className="bg-slate-800">Editor</option>
+                      </select>
+                    ) : (
+                      <div className="px-3 py-1 rounded-full bg-white/10 border border-white/20">
+                        <span className="text-white/90 text-sm font-medium capitalize">{partner.role}</span>
+                      </div>
+                    )}
                     {isOwner && partner.role !== 'owner' && (
                       <motion.button
                         whileHover={{ scale: 1.05 }}

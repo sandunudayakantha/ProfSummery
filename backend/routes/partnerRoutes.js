@@ -6,15 +6,15 @@ const {
   updatePartnerRole,
   removePartner
 } = require('../controllers/partnerController');
-const { protect } = require('../middleware/authMiddleware');
+const { protect, isApproved } = require('../middleware/authMiddleware');
 
 router.route('/')
-  .get(protect, getPartners)
-  .post(protect, addPartner);
+  .get(protect, isApproved, getPartners)
+  .post(protect, isApproved, addPartner);
 
 router.route('/:partnerId')
-  .put(protect, updatePartnerRole)
-  .delete(protect, removePartner);
+  .put(protect, isApproved, updatePartnerRole)
+  .delete(protect, isApproved, removePartner);
 
 module.exports = router;
 

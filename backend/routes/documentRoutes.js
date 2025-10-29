@@ -1,22 +1,16 @@
 const express = require('express');
 const router = express.Router({ mergeParams: true });
 const {
-  uploadLogo,
   uploadDocument,
   getDocuments,
-  deleteDocument,
-  deleteLogo
+  deleteDocument
 } = require('../controllers/documentController');
-const { protect, checkBusinessAccess } = require('../middleware/authMiddleware');
-const { uploadDocument: uploadDocMiddleware, uploadImage } = require('../config/cloudinary');
+const { protect, isApproved, checkBusinessAccess } = require('../middleware/authMiddleware');
+const { uploadDocument: uploadDocMiddleware } = require('../config/cloudinary');
 
-// All routes require authentication and business access
+// All routes require authentication, approval, and business access
 router.use(protect);
-
-// Logo routes (owner only)
-router.route('/logo')
-  .post(checkBusinessAccess('owner'), uploadImage.single('logo'), uploadLogo)
-  .delete(checkBusinessAccess('owner'), deleteLogo);
+router.use(isApproved);
 
 // Document routes
 router.route('/')

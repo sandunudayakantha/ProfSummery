@@ -26,6 +26,36 @@ const userSchema = new mongoose.Schema({
     default: 'USD',
     enum: ['USD', 'EUR', 'GBP', 'JPY', 'LKR', 'INR', 'AUD', 'CAD', 'SGD', 'CNY']
   },
+  role: {
+    type: String,
+    enum: ['user', 'admin'],
+    default: 'user'
+  },
+  isApproved: {
+    type: Boolean,
+    default: false
+  },
+  approvedAt: {
+    type: Date,
+    default: null
+  },
+  approvedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    default: null
+  },
+  tokenVersion: {
+    type: Number,
+    default: 0
+  },
+  resetPasswordToken: {
+    type: String,
+    default: null
+  },
+  resetPasswordExpire: {
+    type: Date,
+    default: null
+  },
   createdAt: {
     type: Date,
     default: Date.now
@@ -45,6 +75,12 @@ userSchema.pre('save', async function(next) {
 // Method to compare passwords
 userSchema.methods.comparePassword = async function(candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
+};
+
+// Method to invalidate all tokens (increment token version)
+userSchema.methods.invalidateTokens = async function() {
+  this.tokenVersion += 1;
+  return await this.save();
 };
 
 module.exports = mongoose.model('User', userSchema);

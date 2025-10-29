@@ -31,7 +31,7 @@ const LogoUpload = ({ businessId, currentLogo, onUploadSuccess }) => {
       formData.append('logo', file);
 
       const response = await api.post(
-        `/business/${businessId}/documents/logo`,
+        `/business/${businessId}/logo`,
         formData,
         {
           headers: {
@@ -61,7 +61,7 @@ const LogoUpload = ({ businessId, currentLogo, onUploadSuccess }) => {
     setError('');
 
     try {
-      await api.delete(`/business/${businessId}/documents/logo`);
+      await api.delete(`/business/${businessId}/logo`);
       setPreview('');
       
       if (onUploadSuccess) {

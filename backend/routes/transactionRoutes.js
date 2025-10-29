@@ -8,10 +8,11 @@ const {
   updateTransaction,
   deleteTransaction
 } = require('../controllers/transactionController');
-const { protect, checkBusinessAccess } = require('../middleware/authMiddleware');
+const { protect, isApproved, checkBusinessAccess } = require('../middleware/authMiddleware');
 
-// All routes require authentication and business access
+// All routes require authentication, approval, and business access
 router.use(protect);
+router.use(isApproved);
 
 // Batch creation route (must come before '/' to avoid conflict)
 router.post('/batch', checkBusinessAccess('editor'), createBatchTransactions);

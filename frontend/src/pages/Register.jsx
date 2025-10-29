@@ -43,6 +43,8 @@ const Register = () => {
     try {
       const result = await register(formData.name, formData.email, formData.password);
       if (result.success) {
+        // Show success message with approval info
+        alert(result.message || 'Account created successfully! Your account is pending approval.');
         navigate('/dashboard');
       } else {
         setError(result.message);

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import { 
   LayoutDashboard, 
   Briefcase, 
@@ -8,21 +9,27 @@ import {
   FileText,
   ChevronLeft,
   ChevronRight,
-  DollarSign
+  DollarSign,
+  Shield
 } from 'lucide-react';
 
 const Sidebar = ({ expanded, setExpanded }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { isAdmin } = useAuth();
 
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
     { id: 'profile', label: 'Profile', icon: User, path: '/profile' },
+    ...(isAdmin ? [{ id: 'admin', label: 'Admin Panel', icon: Shield, path: '/admin' }] : []),
   ];
 
   const isActive = (path) => {
     if (path === '/dashboard') {
       return location.pathname === '/dashboard' || location.pathname === '/';
+    }
+    if (path === '/admin') {
+      return location.pathname.startsWith('/admin');
     }
     return location.pathname.startsWith(path);
   };
@@ -50,8 +57,12 @@ const Sidebar = ({ expanded, setExpanded }) => {
             transition={{ duration: 0.2 }}
             className="flex items-center space-x-3"
           >
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#90e0f7' }}>
-              <DollarSign className="w-5 h-5 text-white" />
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center overflow-hidden" style={{ backgroundColor: '#90e0f7' }}>
+              <img 
+                src="/logo.png" 
+                alt="Profit Summary Logo" 
+                className="w-full h-full object-contain"
+              />
             </div>
             {expanded && (
               <motion.div
