@@ -1,9 +1,29 @@
 import { useState } from 'react';
 import { useCurrency } from '../context/CurrencyContext';
+import { formatCurrency, convertFromUSD } from '../utils/currency';
 
-const DayWiseTransactionList = ({ transactions, onEdit, onDelete, canEdit, onAddToDate }) => {
+const DayWiseTransactionList = ({ transactions, onEdit, onDelete, canEdit, onAddToDate, businessCurrency }) => {
   const [expandedDates, setExpandedDates] = useState(new Set());
-  const { formatAmount } = useCurrency();
+  const { formatAmount, exchangeRates } = useCurrency();
+  
+  // Format amount using business currency if provided, otherwise use user's default currency
+  const formatTransactionAmount = (amountUSD) => {
+    if (businessCurrency) {
+      // Use business currency
+      if (businessCurrency === 'USD' || !exchangeRates?.rates) {
+        return formatCurrency(amountUSD, 'USD');
+      }
+      const rate = exchangeRates.rates[businessCurrency];
+      if (!rate) {
+        return formatCurrency(amountUSD, 'USD');
+      }
+      const converted = amountUSD * rate;
+      return formatCurrency(converted, businessCurrency);
+    } else {
+      // Use user's default currency
+      return formatAmount(amountUSD);
+    }
+  };
 
   // Group transactions by date
   const groupByDate = () => {
@@ -112,15 +132,15 @@ const DayWiseTransactionList = ({ transactions, onEdit, onDelete, canEdit, onAdd
                 <div className="flex items-center space-x-6">
                   <div className="text-right">
                     <div className="text-sm text-green-400">
-                      +{formatAmount(dayData.totalIncome)}
+                      +{formatTransactionAmount(dayData.totalIncome)}
                     </div>
                     <div className="text-sm text-red-400">
-                      -{formatAmount(dayData.totalExpense)}
+                      -{formatTransactionAmount(dayData.totalExpense)}
                     </div>
                     <div className={`text-sm font-bold border-t border-white/20 mt-1 pt-1 ${
                       dayData.netTotal >= 0 ? 'text-blue-400' : 'text-red-400'
                     }`}>
-                      Net: {formatAmount(dayData.netTotal)}
+                      Net: {formatTransactionAmount(dayData.netTotal)}
                     </div>
                   </div>
 
@@ -166,7 +186,7 @@ const DayWiseTransactionList = ({ transactions, onEdit, onDelete, canEdit, onAdd
                         <span className="mr-2">↑</span> Income
                       </h4>
                       <span className="text-sm font-bold text-green-400">
-                        {formatAmount(dayData.totalIncome)}
+                        {formatTransactionAmount(dayData.totalIncome)}
                       </span>
                     </div>
                     
@@ -193,7 +213,7 @@ const DayWiseTransactionList = ({ transactions, onEdit, onDelete, canEdit, onAdd
                               </div>
                               <div className="text-right ml-3">
                                 <div className="text-base font-bold text-green-400">
-                                  +{formatAmount(transaction.amount)}
+                                  +{formatTransactionAmount(transaction.amount)}
                                 </div>
                                 {canEdit && (
                                   <div className="flex space-x-1 mt-1">
@@ -226,7 +246,7 @@ const DayWiseTransactionList = ({ transactions, onEdit, onDelete, canEdit, onAdd
                         <span className="mr-2">↓</span> Expenses
                       </h4>
                       <span className="text-sm font-bold text-red-400">
-                        {formatAmount(dayData.totalExpense)}
+                        {formatTransactionAmount(dayData.totalExpense)}
                       </span>
                     </div>
                     
@@ -253,7 +273,7 @@ const DayWiseTransactionList = ({ transactions, onEdit, onDelete, canEdit, onAdd
                               </div>
                               <div className="text-right ml-3">
                                 <div className="text-base font-bold text-red-400">
-                                  -{formatAmount(transaction.amount)}
+                                  -{formatTransactionAmount(transaction.amount)}
                                 </div>
                                 {canEdit && (
                                   <div className="flex space-x-1 mt-1">

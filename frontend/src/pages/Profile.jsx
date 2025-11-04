@@ -52,6 +52,9 @@ const Profile = () => {
   // Profile update state
   const [name, setName] = useState('');
   const [editingName, setEditingName] = useState(false);
+  const [currency, setCurrency] = useState('USD');
+  const [currencies, setCurrencies] = useState([]);
+  const [updatingCurrency, setUpdatingCurrency] = useState(false);
 
   // Password change state
   const [passwordForm, setPasswordForm] = useState({
@@ -77,8 +80,19 @@ const Profile = () => {
   useEffect(() => {
     if (user) {
       setName(user.name);
+      setCurrency(user.currency || 'USD');
     }
+    fetchCurrencies();
   }, [user]);
+
+  const fetchCurrencies = async () => {
+    try {
+      const response = await api.get('/currency/supported');
+      setCurrencies(response.data.data);
+    } catch (error) {
+      console.error('Error fetching currencies:', error);
+    }
+  };
 
   const showMessage = (type, text) => {
     setMessage({ type, text });
@@ -106,6 +120,27 @@ const Profile = () => {
       showMessage('error', error.response?.data?.message || 'Failed to update profile');
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Update Currency
+  const handleUpdateCurrency = async (newCurrency) => {
+    setUpdatingCurrency(true);
+    try {
+      const response = await api.put('/auth/profile', { currency: newCurrency });
+      
+      // Update local storage
+      const updatedUser = { ...user, currency: response.data.data.currency };
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      
+      // Update context (refresh page to reflect changes)
+      window.location.reload();
+      
+      showMessage('success', 'Default currency updated successfully!');
+    } catch (error) {
+      showMessage('error', error.response?.data?.message || 'Failed to update currency');
+    } finally {
+      setUpdatingCurrency(false);
     }
   };
 
@@ -326,19 +361,36 @@ const Profile = () => {
             )}
           </div>
 
-          {/* Currency Info */}
+          {/* Currency Preference */}
           <div className="mb-6">
             <label className="block text-sm font-medium text-white/90 mb-3 flex items-center space-x-2">
               <DollarSign className="w-4 h-4" />
-              <span>Currency Preference</span>
+              <span>Default Currency</span>
             </label>
-            <div className="px-4 py-3 bg-white/5 border border-white/20 rounded-lg">
-              <p className="text-sm text-white/70">
-                Currency is now managed per business. You can set the currency for each business individually from the business details page.
-              </p>
-              <p className="text-xs text-white/50 mt-2 flex items-center space-x-1">
+            <div className="space-y-3">
+              <div className="relative">
+                <select
+                  value={currency}
+                  onChange={(e) => {
+                    setCurrency(e.target.value);
+                    handleUpdateCurrency(e.target.value);
+                  }}
+                  disabled={updatingCurrency}
+                  className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white focus:outline-none focus:bg-white/10 transition-all appearance-none cursor-pointer"
+                  onFocus={(e) => e.target.style.borderColor = 'rgba(144, 224, 247, 0.5)'}
+                  onBlur={(e) => e.target.style.borderColor = 'rgba(255, 255, 255, 0.2)'}
+                  style={{ colorScheme: 'dark' }}
+                >
+                  {currencies.map((curr) => (
+                    <option key={curr.code} value={curr.code} className="bg-slate-800">
+                      {curr.symbol} {curr.code} - {curr.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <p className="text-xs text-white/50 flex items-center space-x-1">
                 <Calendar className="w-3 h-3" />
-                <span>Default currency for new businesses: {user?.currency || 'USD'}</span>
+                <span>This currency will be used for the main dashboard and as the default for new businesses. Each business can have its own currency set individually.</span>
               </p>
             </div>
           </div>

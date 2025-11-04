@@ -595,6 +595,7 @@ const BusinessDetails = () => {
                   onDelete={handleDeleteTransaction}
                   onAddToDate={handleAddToDate}
                   canEdit={canEdit}
+                  businessCurrency={business?.currency}
                 />
               )}
             </GlassCard>
@@ -661,6 +662,7 @@ const BusinessDetails = () => {
                 onDelete={handleDeleteTransaction}
                 onAddToDate={handleAddToDate}
                 canEdit={canEdit}
+                businessCurrency={business?.currency}
               />
             )}
           </GlassCard>
