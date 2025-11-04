@@ -424,6 +424,57 @@ const BusinessDetails = () => {
         </div>
       )}
 
+      {/* Business Currency Settings - Dashboard Section - Owner Only */}
+      {isOwner && stats && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.35 }}
+        >
+          <GlassCard className="p-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3 flex-1">
+                <div className="p-2 rounded-xl" style={{ backgroundColor: 'rgba(144, 224, 247, 0.2)' }}>
+                  <DollarSign className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold text-white">Business Currency</h2>
+                  <p className="text-white/60 text-sm">Set the currency for this business</p>
+                </div>
+              </div>
+              
+              <div className="flex items-center space-x-3">
+                {error && (
+                  <div className="px-3 py-2 bg-red-500/20 border border-red-400/50 text-red-200 rounded-lg text-sm">
+                    {error}
+                  </div>
+                )}
+                <div className="relative">
+                  <select
+                    value={business?.currency || 'USD'}
+                    onChange={(e) => handleUpdateCurrency(e.target.value)}
+                    disabled={updatingCurrency}
+                    className="px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white focus:outline-none focus:bg-white/10 transition-all appearance-none cursor-pointer text-sm"
+                    onFocus={(e) => e.target.style.borderColor = 'rgba(144, 224, 247, 0.5)'}
+                    onBlur={(e) => e.target.style.borderColor = 'rgba(255, 255, 255, 0.2)'}
+                    style={{ colorScheme: 'dark', minWidth: '200px' }}
+                  >
+                    {currencies.map((curr) => (
+                      <option key={curr.code} value={curr.code} className="bg-slate-800">
+                        {curr.symbol} {curr.code} - {curr.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+            <p className="text-xs text-white/50 mt-3">
+              Changing the currency will affect how amounts are displayed for this business. All amounts are stored in USD and converted for display.
+            </p>
+          </GlassCard>
+        </motion.div>
+      )}
+
       {/* Tabs */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -547,60 +598,6 @@ const BusinessDetails = () => {
                 />
               )}
             </GlassCard>
-
-            {/* Business Currency Settings - Owner Only */}
-            {isOwner && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.3 }}
-              >
-                <GlassCard className="p-6">
-                  <div className="flex items-center space-x-3 mb-4">
-                    <div className="p-2 rounded-xl" style={{ backgroundColor: 'rgba(144, 224, 247, 0.2)' }}>
-                      <DollarSign className="w-6 h-6 text-white" />
-                    </div>
-                    <div>
-                      <h2 className="text-lg font-semibold text-white">Business Currency</h2>
-                      <p className="text-white/60 text-sm">Set the currency for this business</p>
-                    </div>
-                  </div>
-                  
-                  {error && (
-                    <div className="mb-4 p-3 bg-red-500/20 border border-red-400/50 text-red-200 rounded-lg text-sm">
-                      {error}
-                    </div>
-                  )}
-
-                  <div className="space-y-3">
-                    <label className="block text-sm font-medium text-white/90">
-                      Current Currency
-                    </label>
-                    <div className="relative">
-                      <select
-                        value={business?.currency || 'USD'}
-                        onChange={(e) => handleUpdateCurrency(e.target.value)}
-                        disabled={updatingCurrency}
-                        className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white focus:outline-none focus:bg-white/10 transition-all appearance-none cursor-pointer"
-                        onFocus={(e) => e.target.style.borderColor = 'rgba(144, 224, 247, 0.5)'}
-                        onBlur={(e) => e.target.style.borderColor = 'rgba(255, 255, 255, 0.2)'}
-                        style={{ colorScheme: 'dark' }}
-                      >
-                        {currencies.map((curr) => (
-                          <option key={curr.code} value={curr.code} className="bg-slate-800">
-                            {curr.symbol} {curr.code} - {curr.name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <p className="text-xs text-white/50">
-                      Changing the currency will affect how amounts are displayed for this business. All amounts are stored in USD and converted for display.
-                    </p>
-                  </div>
-                </GlassCard>
-              </motion.div>
-            )}
           </motion.div>
         )}
       </AnimatePresence>
