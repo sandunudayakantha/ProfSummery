@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   User, 
   Mail, 
@@ -17,7 +17,8 @@ import {
   Eye,
   EyeOff,
   Calendar,
-  DollarSign
+  DollarSign,
+  ArrowLeft
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
@@ -27,12 +28,30 @@ import FloatingButton from '../components/FloatingButton';
 const Profile = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  
+  // Function to handle back navigation
+  const handleBack = () => {
+    // Check if there's a previous path in location state
+    const previousPath = location.state?.from;
+    
+    if (previousPath && previousPath !== '/profile') {
+      // Navigate back to the previous page
+      navigate(previousPath);
+    } else {
+      // Check browser history - if we can go back, do it
+      // Otherwise fall back to dashboard
+      if (window.history.length > 1) {
+        navigate(-1);
+      } else {
+        navigate('/dashboard');
+      }
+    }
+  };
 
   // Profile update state
   const [name, setName] = useState('');
   const [editingName, setEditingName] = useState(false);
-  const [currency, setCurrency] = useState('USD');
-  const [currencies, setCurrencies] = useState([]);
 
   // Password change state
   const [passwordForm, setPasswordForm] = useState({
@@ -58,19 +77,8 @@ const Profile = () => {
   useEffect(() => {
     if (user) {
       setName(user.name);
-      setCurrency(user.currency || 'USD');
     }
-    fetchCurrencies();
   }, [user]);
-
-  const fetchCurrencies = async () => {
-    try {
-      const response = await api.get('/currency/supported');
-      setCurrencies(response.data.data);
-    } catch (error) {
-      console.error('Error fetching currencies:', error);
-    }
-  };
 
   const showMessage = (type, text) => {
     setMessage({ type, text });
@@ -101,29 +109,6 @@ const Profile = () => {
     }
   };
 
-  // Update Currency
-  const handleUpdateCurrency = async (newCurrency) => {
-    setLoading(true);
-
-    try {
-      const response = await api.put('/auth/profile', { currency: newCurrency });
-      
-      // Update local storage
-      const updatedUser = { ...user, currency: response.data.data.currency };
-      localStorage.setItem('user', JSON.stringify(updatedUser));
-      
-      // Update state
-      setCurrency(newCurrency);
-      
-      showMessage('success', 'Currency updated! Page will reload to show new currency.');
-      
-      // Reload to update all amounts
-      setTimeout(() => window.location.reload(), 2000);
-    } catch (error) {
-      showMessage('error', error.response?.data?.message || 'Failed to update currency');
-      setLoading(false);
-    }
-  };
 
   // Change Password
   const handleChangePassword = async (e) => {
@@ -194,20 +179,20 @@ const Profile = () => {
         className="flex flex-col sm:flex-row sm:items-center justify-between gap-4"
       >
         <div>
-          <h1 className="text-3xl font-bold text-white mb-2">Profile Settings</h1>
+          <h1 className="text-xl sm:text-3xl font-bold text-white mb-2">Profile Settings</h1>
           <div className="flex items-center space-x-2">
             <div className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: '#90e0f7' }}></div>
-            <span className="text-white/50 text-sm">Manage your account</span>
+            <span className="text-white/50 text-xs sm:text-sm">Manage your account</span>
           </div>
         </div>
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          onClick={() => navigate('/dashboard')}
+          onClick={handleBack}
           className="px-6 py-3 text-white rounded-xl shadow-lg transition-all duration-300 flex items-center space-x-2 hover:opacity-90 bg-white/10 border border-white/20"
         >
-          <Settings className="w-5 h-5" />
-          <span>Back to Dashboard</span>
+          <ArrowLeft className="w-5 h-5" />
+          <span>Back</span>
         </motion.button>
       </motion.div>
 
@@ -246,7 +231,7 @@ const Profile = () => {
               <User className="w-8 h-8 text-white" />
             </div>
             <div>
-              <h2 className="text-xl font-semibold text-white">Profile Information</h2>
+              <h2 className="text-lg sm:text-xl font-semibold text-white">Profile Information</h2>
               <p className="text-white/60 text-sm">Manage your personal details</p>
             </div>
           </div>
@@ -341,33 +326,21 @@ const Profile = () => {
             )}
           </div>
 
-          {/* Currency Preference */}
+          {/* Currency Info */}
           <div className="mb-6">
             <label className="block text-sm font-medium text-white/90 mb-3 flex items-center space-x-2">
               <DollarSign className="w-4 h-4" />
-              <span>Preferred Currency</span>
+              <span>Currency Preference</span>
             </label>
-            <div className="relative">
-              <select
-                value={currency}
-                onChange={(e) => handleUpdateCurrency(e.target.value)}
-                disabled={loading}
-                className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white focus:outline-none focus:bg-white/10 transition-all appearance-none cursor-pointer"
-                onFocus={(e) => e.target.style.borderColor = 'rgba(144, 224, 247, 0.5)'}
-                onBlur={(e) => e.target.style.borderColor = 'rgba(255, 255, 255, 0.2)'}
-                style={{ colorScheme: 'dark' }}
-              >
-                {currencies.map((curr) => (
-                  <option key={curr.code} value={curr.code} className="bg-slate-800">
-                    {curr.symbol} {curr.code} - {curr.name}
-                  </option>
-                ))}
-              </select>
+            <div className="px-4 py-3 bg-white/5 border border-white/20 rounded-lg">
+              <p className="text-sm text-white/70">
+                Currency is now managed per business. You can set the currency for each business individually from the business details page.
+              </p>
+              <p className="text-xs text-white/50 mt-2 flex items-center space-x-1">
+                <Calendar className="w-3 h-3" />
+                <span>Default currency for new businesses: {user?.currency || 'USD'}</span>
+              </p>
             </div>
-            <p className="text-xs text-white/50 mt-2 flex items-center space-x-1">
-              <Calendar className="w-3 h-3" />
-              <span>Exchange rates update daily</span>
-            </p>
           </div>
 
           {/* Account Created */}
@@ -395,7 +368,7 @@ const Profile = () => {
                 <Lock className="w-8 h-8 text-white" />
               </div>
               <div>
-                <h2 className="text-xl font-semibold text-white">Security Settings</h2>
+                <h2 className="text-lg sm:text-xl font-semibold text-white">Security Settings</h2>
                 <p className="text-white/60 text-sm">Manage your password and security</p>
               </div>
             </div>
@@ -561,7 +534,7 @@ const Profile = () => {
               <AlertTriangle className="w-8 h-8 text-red-400" />
             </div>
             <div>
-              <h2 className="text-xl font-semibold text-red-200">Danger Zone</h2>
+              <h2 className="text-lg sm:text-xl font-semibold text-red-200">Danger Zone</h2>
               <p className="text-red-300/70 text-sm">Irreversible actions that affect your account</p>
             </div>
           </div>

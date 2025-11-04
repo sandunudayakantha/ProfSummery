@@ -142,7 +142,7 @@ const Dashboard = () => {
 
   return (
     <>
-      <div className="h-full overflow-auto p-6 space-y-6">
+      <div className="h-full overflow-auto p-3 sm:p-6 space-y-4 sm:space-y-6">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -150,7 +150,7 @@ const Dashboard = () => {
           className="flex flex-col sm:flex-row sm:items-center justify-between gap-4"
         >
           <div>
-            <h1 className="text-3xl font-bold text-white mb-2">Dashboard Overview</h1>
+            <h1 className="text-xl sm:text-3xl font-bold text-white mb-2">Dashboard Overview</h1>
             <div className="flex items-center space-x-2">
               <div className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: '#90e0f7' }}></div>
               <span className="text-white/50 text-sm">System Online</span>
@@ -160,17 +160,18 @@ const Dashboard = () => {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setShowCreateModal(true)}
-            className="px-6 py-3 text-white rounded-xl shadow-lg transition-all duration-300 flex items-center space-x-2 hover:opacity-90"
+            className="px-4 sm:px-6 py-2 sm:py-3 text-white rounded-xl shadow-lg transition-all duration-300 flex items-center space-x-2 hover:opacity-90 text-sm sm:text-base"
             style={{ backgroundColor: '#90e0f7' }}
           >
-            <Plus className="w-5 h-5" />
-            <span>Create Business</span>
+            <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
+            <span className="hidden sm:inline">Create Business</span>
+            <span className="sm:hidden">Create</span>
           </motion.button>
         </motion.div>
 
         {/* KPI Cards */}
         {overallStats && businesses.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             {/* Total Businesses */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -180,8 +181,8 @@ const Dashboard = () => {
               <GlassCard glow gradient="green" className="p-6">
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
-                    <p className="text-white/80 text-sm font-medium mb-2">Total Businesses</p>
-                    <h3 className="text-white text-4xl font-bold mb-3 tracking-tight">{overallStats.totalBusinesses || 0}</h3>
+                    <p className="text-white/80 text-xs sm:text-sm font-medium mb-2">Total Businesses</p>
+                    <h3 className="text-white text-lg sm:text-4xl font-bold mb-3 tracking-tight">{overallStats.totalBusinesses || 0}</h3>
                     <div className="flex items-center space-x-2">
                       <Briefcase className="w-4 h-4" style={{ color: '#90e0f7' }} />
                       <span className="text-sm font-medium" style={{ color: '#90e0f7' }}>Active Portfolio</span>
@@ -203,8 +204,8 @@ const Dashboard = () => {
               <GlassCard glow gradient="emerald" className="p-6">
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
-                    <p className="text-white/80 text-sm font-medium mb-2">Total Income</p>
-                    <h3 className="text-white text-2xl font-bold mb-3 tracking-tight">{formatAmount(overallStats.totalIncome || 0)}</h3>
+                    <p className="text-white/80 text-xs sm:text-sm font-medium mb-2">Total Income</p>
+                    <h3 className="text-white text-base sm:text-2xl font-bold mb-3 tracking-tight">{formatAmount(overallStats.totalIncome || 0)}</h3>
                     <div className="flex items-center space-x-2">
                       <TrendingUp className="w-4 h-4" style={{ color: '#10b981' }} />
                       <span className="text-sm font-medium" style={{ color: '#10b981' }}>Revenue Stream</span>
@@ -226,8 +227,8 @@ const Dashboard = () => {
               <GlassCard glow gradient="red" className="p-6">
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
-                    <p className="text-white/80 text-sm font-medium mb-2">Total Expenses</p>
-                    <h3 className="text-white text-2xl font-bold mb-3 tracking-tight">{formatAmount(overallStats.totalExpense || 0)}</h3>
+                    <p className="text-white/80 text-xs sm:text-sm font-medium mb-2">Total Expenses</p>
+                    <h3 className="text-white text-base sm:text-2xl font-bold mb-3 tracking-tight">{formatAmount(overallStats.totalExpense || 0)}</h3>
                     <div className="flex items-center space-x-2">
                       <TrendingDown className="w-4 h-4 text-red-400" />
                       <span className="text-red-400 text-sm font-medium">{overallStats.totalTransactions || 0} Transactions</span>
@@ -253,8 +254,8 @@ const Dashboard = () => {
               >
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
-                    <p className="text-white/80 text-sm font-medium mb-2">Net Profit</p>
-                    <h3 className={`text-2xl font-bold mb-3 tracking-tight ${
+                    <p className="text-white/80 text-xs sm:text-sm font-medium mb-2">Net Profit</p>
+                    <h3 className={`text-base sm:text-2xl font-bold mb-3 tracking-tight ${
                       overallStats.netProfit >= 0 ? 'text-blue-400' : 'text-orange-400'
                     }`}>
                       {overallStats.netProfit >= 0 ? '+' : '-'}{formatAmount(Math.abs(overallStats.netProfit || 0))}
@@ -285,7 +286,7 @@ const Dashboard = () => {
 
         {/* Charts Section */}
         {overallStats && businesses.length > 0 && (
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
             {/* Business Performance Chart */}
             <motion.div
               initial={{ opacity: 0, x: -20 }}
@@ -294,7 +295,7 @@ const Dashboard = () => {
             >
               <GlassCard className="p-6">
                 <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-white text-lg font-semibold">Business Performance</h3>
+                  <h3 className="text-white text-base sm:text-lg font-semibold">Business Performance</h3>
                   <div className="flex items-center space-x-4">
                     <div className="flex items-center space-x-2">
                       <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#90e0f7' }}></div>
@@ -368,7 +369,7 @@ const Dashboard = () => {
               transition={{ delay: 0.5 }}
             >
               <GlassCard className="p-6">
-                <h3 className="text-white text-lg font-semibold mb-6">Financial Breakdown</h3>
+                <h3 className="text-white text-base sm:text-lg font-semibold mb-4 sm:mb-6">Financial Breakdown</h3>
                 <div className="h-80 flex items-center justify-center">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
@@ -420,7 +421,7 @@ const Dashboard = () => {
           >
             <GlassCard className="p-6">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-white text-lg font-semibold">Business Performance</h3>
+                <h3 className="text-white text-base sm:text-lg font-semibold">Business Performance</h3>
                 <button 
                   onClick={() => navigate('/businesses')}
                   className="text-sm transition-colors hover:opacity-80"
@@ -507,7 +508,7 @@ const Dashboard = () => {
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ delay: 0.8, type: "spring" }}
-            className="fixed bottom-8 right-8 z-50"
+            className="fixed bottom-4 right-4 sm:bottom-8 sm:right-8 z-50"
           >
             <FloatingButton 
               size="lg" 
@@ -527,7 +528,7 @@ const Dashboard = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-3 sm:p-4"
             onClick={() => setShowCreateModal(false)}
           >
             <motion.div
@@ -535,11 +536,11 @@ const Dashboard = () => {
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.9, opacity: 0, y: 20 }}
               onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-md"
+              className="w-full max-w-sm sm:max-w-md"
             >
-              <GlassCard className="p-8">
+              <GlassCard className="p-4 sm:p-8">
                 <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-2xl font-bold text-white">Create New Business</h2>
+                  <h2 className="text-xl sm:text-2xl font-bold text-white">Create New Business</h2>
                   <button
                     onClick={() => setShowCreateModal(false)}
                     className="p-2 rounded-lg hover:bg-white/10 transition-colors"

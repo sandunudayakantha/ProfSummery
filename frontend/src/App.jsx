@@ -29,6 +29,7 @@ import NotFound from './pages/NotFound';
 // Layout component for authenticated pages
 const AuthenticatedLayout = ({ children }) => {
   const [sidebarExpanded, setSidebarExpanded] = useState(true);
+  const [mobileOpen, setMobileOpen] = useState(false);
   
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 overflow-hidden relative">
@@ -70,12 +71,16 @@ const AuthenticatedLayout = ({ children }) => {
         <Sidebar 
           expanded={sidebarExpanded}
           setExpanded={setSidebarExpanded}
+          mobileOpen={mobileOpen}
+          setMobileOpen={setMobileOpen}
         />
         
         <div className="flex-1 flex flex-col overflow-hidden">
           <NavbarTop 
             sidebarExpanded={sidebarExpanded}
             setSidebarExpanded={setSidebarExpanded}
+            mobileOpen={mobileOpen}
+            setMobileOpen={setMobileOpen}
           />
           
           <main className="flex-1 overflow-hidden">

@@ -5,6 +5,7 @@ const {
   getAllBusinesses,
   getBusiness,
   updateBusiness,
+  updateBusinessCurrency,
   deleteBusiness
 } = require('../controllers/businessController');
 const {
@@ -17,6 +18,10 @@ const { uploadImage } = require('../config/cloudinary');
 router.route('/')
   .get(protect, isApproved, getAllBusinesses)
   .post(protect, isApproved, createBusiness);
+
+// Currency route (owner only) - must be before /:id route
+router.route('/:id/currency')
+  .put(protect, isApproved, checkBusinessAccess('owner'), updateBusinessCurrency);
 
 router.route('/:id')
   .get(protect, isApproved, getBusiness)

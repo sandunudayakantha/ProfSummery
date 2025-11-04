@@ -72,6 +72,11 @@ const businessSchema = new mongoose.Schema({
       default: Date.now
     }
   }],
+  currency: {
+    type: String,
+    default: 'USD',
+    enum: ['USD', 'EUR', 'GBP', 'JPY', 'LKR', 'INR', 'AUD', 'CAD', 'SGD', 'CNY']
+  },
   createdAt: {
     type: Date,
     default: Date.now

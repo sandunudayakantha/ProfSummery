@@ -163,23 +163,23 @@ const Login = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="max-w-md w-full space-y-8 relative z-10"
+        className="max-w-sm sm:max-w-md w-full space-y-6 sm:space-y-8 relative z-10 px-4 sm:px-0"
       >
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5, delay: 0.2 }}
-          className="bg-white/5 backdrop-blur-xl border border-white/20 rounded-2xl p-8 shadow-2xl"
+          className="bg-white/5 backdrop-blur-xl border border-white/20 rounded-2xl p-4 sm:p-8 shadow-2xl"
         >
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 0.3 }}
           >
-            <h2 className="mt-6 text-center text-3xl font-extrabold text-white" style={{ color: 'white' }}>
+            <h2 className="mt-4 sm:mt-6 text-center text-xl sm:text-3xl font-extrabold text-white" style={{ color: 'white' }}>
               Sign in to your account
             </h2>
-            <p className="mt-2 text-center text-sm text-white/60" style={{ color: 'rgba(255, 255, 255, 0.6)' }}>
+            <p className="mt-2 text-center text-xs sm:text-sm text-white/60" style={{ color: 'rgba(255, 255, 255, 0.6)' }}>
               Or{' '}
               <Link to="/register" className="font-medium text-blue-400 hover:text-blue-300 transition-colors" style={{ color: '#60a5fa' }}>
                 create a new account
@@ -191,7 +191,7 @@ const Login = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 0.4 }}
-            className="mt-8 space-y-6"
+            className="mt-6 sm:mt-8 space-y-4 sm:space-y-6"
             onSubmit={handleSubmit}
           >
             {error && (

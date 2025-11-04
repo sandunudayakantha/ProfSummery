@@ -6,7 +6,7 @@ const User = require('../models/User');
 // @access  Private
 exports.createBusiness = async (req, res) => {
   try {
-    const { name, description } = req.body;
+    const { name, description, currency } = req.body;
 
     if (!name) {
       return res.status(400).json({
@@ -15,10 +15,15 @@ exports.createBusiness = async (req, res) => {
       });
     }
 
+    // Get user's currency as default if not provided
+    const user = await User.findById(req.user._id);
+    const businessCurrency = currency || user.currency || 'USD';
+
     const business = await Business.create({
       name,
       description: description || '',
-      owner: req.user._id
+      owner: req.user._id,
+      currency: businessCurrency
     });
 
     // Populate owner details
@@ -46,9 +51,19 @@ exports.getAllBusinesses = async (req, res) => {
     const businesses = await Business.find({
       'partners.user': req.user._id
     })
-      .populate('owner', 'name email')
+      .populate('owner', 'name email currency')
       .populate('partners.user', 'name email')
       .sort('-createdAt');
+
+    // Migration: Update businesses without currency
+    const migrationPromises = businesses.map(async (business) => {
+      if (!business.currency && business.owner) {
+        business.currency = business.owner.currency || 'USD';
+        await business.save();
+      }
+      return business;
+    });
+    await Promise.all(migrationPromises);
 
     res.status(200).json({
       success: true,
@@ -78,6 +93,13 @@ exports.getBusiness = async (req, res) => {
         success: false,
         message: 'Business not found'
       });
+    }
+
+    // Migration: If business doesn't have currency, set it from owner's currency
+    if (!business.currency) {
+      const owner = await User.findById(business.owner._id);
+      business.currency = owner.currency || 'USD';
+      await business.save();
     }
 
     // Check if user has access
@@ -152,6 +174,63 @@ exports.updateBusiness = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Error updating business',
+      error: error.message
+    });
+  }
+};
+
+// @desc    Update business currency
+// @route   PUT /api/business/:id/currency
+// @access  Private (Owner only)
+exports.updateBusinessCurrency = async (req, res) => {
+  try {
+    const { currency } = req.body;
+
+    if (!currency) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide a currency'
+      });
+    }
+
+    const supportedCurrencies = ['USD', 'EUR', 'GBP', 'JPY', 'LKR', 'INR', 'AUD', 'CAD', 'SGD', 'CNY'];
+    if (!supportedCurrencies.includes(currency)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Unsupported currency'
+      });
+    }
+
+    const business = await Business.findById(req.params.id);
+
+    if (!business) {
+      return res.status(404).json({
+        success: false,
+        message: 'Business not found'
+      });
+    }
+
+    // Check if user is owner
+    if (business.owner.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: 'Only the owner can update business currency'
+      });
+    }
+
+    business.currency = currency;
+    await business.save();
+    await business.populate('owner', 'name email');
+    await business.populate('partners.user', 'name email');
+
+    res.status(200).json({
+      success: true,
+      data: business
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error updating business currency',
       error: error.message
     });
   }

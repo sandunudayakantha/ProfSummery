@@ -1,9 +1,14 @@
 import { useState } from 'react';
 import { useCurrency } from '../context/CurrencyContext';
+import { CURRENCY_SYMBOLS } from '../utils/currency';
 import api from '../utils/api';
 
-const DayWiseTransactionForm = ({ onSubmit, onCancel, preSelectedDate = null }) => {
-  const { formatAmount, userCurrency, getCurrencySymbol } = useCurrency();
+const DayWiseTransactionForm = ({ onSubmit, onCancel, preSelectedDate = null, businessCurrency = null }) => {
+  const { formatAmount, userCurrency: defaultCurrency, getCurrencySymbol: defaultGetCurrencySymbol } = useCurrency();
+  const userCurrency = businessCurrency || defaultCurrency;
+  const getCurrencySymbol = () => {
+    return CURRENCY_SYMBOLS[userCurrency] || defaultGetCurrencySymbol();
+  };
   const [date, setDate] = useState(preSelectedDate || new Date().toISOString().split('T')[0]);
   const [items, setItems] = useState([
     { type: 'income', amount: '', description: '' }
@@ -257,8 +262,8 @@ const DayWiseTransactionForm = ({ onSubmit, onCancel, preSelectedDate = null }) 
         ))}
       </div>
 
-      {/* Totals Summary */}
-      <div className="bg-white/5 p-4 rounded-lg border border-white/20">
+      {/* Totals Summary - Hidden on mobile */}
+      <div className="hidden sm:block bg-white/5 p-4 rounded-lg border border-white/20">
         <h4 className="text-sm font-medium text-white/90 mb-2">Day Summary (in {userCurrency})</h4>
         <div className="grid grid-cols-3 gap-4 text-sm">
           <div>
